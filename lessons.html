@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maths for Computing Lessons</title>
+<style>
+:root{color-scheme:light}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* Layout: one lesson column; sticky lesson tabs; each step = short explanation, then a try-it box, then a quick check. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --sunk:#e9edf3; --ink:#17202e; --muted:#566275; --line:#cfd6e1;
+  --accent:#2447a8; --on-accent:#ffffff; --good:#17753f; --bad:#b3261e; --good-bg:#e2f4e9; --bad-bg:#fbe6e4;
+  --text:Aptos,Calibri,"Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"Cascadia Mono",Consolas,ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11151c; --surface:#1a2029; --sunk:#232b37; --ink:#e7ebf1; --muted:#9ba7b9; --line:#364152;
+  --accent:#9db8ff; --on-accent:#0f1830; --good:#63d394; --bad:#ff9087; --good-bg:#173524; --bad-bg:#3d1c1a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#11151c; --surface:#1a2029; --sunk:#232b37; --ink:#e7ebf1; --muted:#9ba7b9; --line:#364152;
+  --accent:#9db8ff; --on-accent:#0f1830; --good:#63d394; --bad:#ff9087; --good-bg:#173524; --bad-bg:#3d1c1a; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:880px;margin:0 auto;padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:1.7rem;line-height:1.2;margin:0 0 4px;text-wrap:balance}
+h2{font-size:1.3rem;margin:0;text-wrap:balance}
+h3{font-size:1.12rem;margin:0;text-wrap:balance}
+p{margin:0}
+a{color:var(--accent)}
+.lede{color:var(--muted);max-width:62ch}
+.mono,code{font-family:var(--mono);font-size:.95em}
+code{background:var(--sunk);padding:1px 5px;border-radius:4px}
+
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px;margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+nav button{font:inherit;text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;min-width:0}
+nav button b{display:block;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+nav button span{display:block;font-size:.95rem;line-height:1.25}
+nav button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+nav button[aria-selected="true"] b{color:var(--on-accent);opacity:.85}
+@media (max-width:560px){nav{grid-template-columns:1fr}nav button{display:flex;gap:10px;align-items:baseline}}
+
+section.lesson{display:flex;flex-direction:column;gap:22px;margin-top:8px}
+.intro{display:flex;flex-direction:column;gap:6px}
+.intro p{max-width:68ch}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.step-n{font-family:var(--mono);font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.step ul,.step ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:5px;max-width:70ch}
+.label{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.try{background:var(--sunk);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.eg{border-left:3px solid var(--accent);padding-left:12px;display:flex;flex-direction:column;gap:4px;max-width:70ch}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;align-items:start}
+.two>*{min-width:0}
+.note{font-size:.92rem;color:var(--muted);border-left:3px solid var(--line);padding-left:10px;max-width:70ch}
+
+.switches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{display:flex;align-items:center;gap:10px;font:inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 8px 6px 12px;cursor:pointer;text-align:left}
+.sw span{font-family:var(--mono);font-weight:700}
+.sw small{display:block;font-family:var(--text);font-weight:400;color:var(--muted);font-size:.82rem}
+.sw b{font-family:var(--mono);width:36px;height:32px;display:grid;place-items:center;border-radius:6px;background:var(--sunk)}
+.sw[aria-pressed="true"] b{background:var(--accent);color:var(--on-accent)}
+.out{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lamp{display:inline-flex;gap:6px;align-items:center;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-family:var(--mono);font-size:.95rem}
+.lamp.on{background:var(--good-bg);border-color:var(--good);color:var(--good);font-weight:700}
+.say{flex-basis:100%;color:var(--muted)}
+
+.q{display:flex;flex-direction:column;gap:10px;min-width:0}
+.prompt{max-width:68ch}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=text],select{font:inherit;font-family:var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
+input[type=text]{flex:1 1 220px;max-width:340px}
+.btn{font:inherit;font-size:.95rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 14px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn.opt{font-family:var(--mono)}
+.btn.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.btn.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fb{min-height:1.5em;font-weight:600}
+.fb.ok{color:var(--good)} .fb.no{color:var(--bad)} .fb.info{color:var(--muted);font-weight:400}
+.work{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:6px;overflow-x:auto}
+.work .ans{font-weight:700}
+
+.scroll{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:4px 10px;text-align:center;background:var(--surface)}
+th{background:var(--ink);color:var(--bg);font-weight:600;white-space:nowrap}
+td.out,td.bitc{padding:2px}
+td.pv{color:var(--muted);font-size:.85rem}
+td.gap,th.gap{border:0;background:transparent;min-width:10px;padding:0 4px}
+td.pt{border:0;background:transparent;font-weight:700;padding:0 2px}
+.cell{font:inherit;width:44px;height:32px;border:1px dashed var(--muted);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.cell.set{border-style:solid;font-weight:700}
+.cell.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.cell.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.cell.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+
+svg.circuit{width:100%;max-width:480px;height:auto;display:block}
+svg.circuit .w{stroke:var(--ink);stroke-width:2;fill:none}
+svg.circuit .g{stroke:var(--ink);stroke-width:2;fill:var(--surface)}
+svg.circuit .slot{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4;fill:var(--surface)}
+svg.circuit .box{stroke:var(--ink);stroke-width:2;fill:var(--sunk)}
+svg.circuit .dot{fill:var(--ink)}
+svg.circuit text{fill:var(--ink);font-family:var(--mono);font-size:13px}
+svg.circuit text.sm{fill:var(--muted);font-size:10px}
+svg.circuit text.v{fill:var(--accent);font-weight:700}
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.gatecard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.gatecard h4{margin:0;font-size:1rem}
+.gatecard svg{max-width:170px}
+.gatecard p{font-size:.9rem;color:var(--muted)}
+.picks{display:flex;flex-wrap:wrap;gap:10px}
+.picks label{display:flex;flex-direction:column;gap:3px;font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.btn,.cell,.sw b,nav button{transition:background-color .12s,border-color .12s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Maths for Computing Lessons</h1>
+    <p class="lede">Three short lessons for learners meeting these topics for the first time. Each step explains one idea, lets you try it, then checks you have it before moving on.</p>
+    <p style="margin-top:8px"><a href="./">Already covered these? Go to the revision practice</a></p>
+  </header>
+
+  <nav role="tablist" aria-label="Lessons">
+    <button role="tab" id="tab-logic" data-l="logic"><b>Lesson 1</b><span>Logical operators</span></button>
+    <button role="tab" id="tab-gates" data-l="gates"><b>Lesson 2</b><span>Logic gates and adders</span></button>
+    <button role="tab" id="tab-twos" data-l="twos"><b>Lesson 3</b><span>Negative numbers and floating point</span></button>
+  </nav>
+
+  <!-- ============ LESSON 1 ============ -->
+  <section class="lesson" id="logic" role="tabpanel" aria-labelledby="tab-logic">
+    <div class="intro"><h2>Lesson 1: Logical operators</h2>
+      <p>Covers outcome 2: truth tables for NOT, AND and OR, and for expressions that use up to three operators. You do not need any earlier topic for this lesson.</p></div>
+
+    <article class="step"><span class="step-n">Step 1</span><h3>True or false, 1 or 0</h3>
+      <ul>
+        <li>Computers make decisions using statements that are either true or false. There is nothing in between.</li>
+        <li>We write <b>1</b> for true and <b>0</b> for false.</li>
+        <li>We give each statement a letter. For example, A = "it is raining". If it is raining, A = 1. If it is dry, A = 0.</li>
+      </ul>
+      <div class="try" id="m1"></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 2</span><h3>NOT gives the opposite</h3>
+      <ul>
+        <li>NOT has one input. It flips it: 1 becomes 0 and 0 becomes 1.</li>
+        <li>If A = "it is raining", then NOT A = "it is not raining".</li>
+      </ul>
+      <div class="two">
+        <div class="try"><p class="label">Try it: tap the switch</p><div id="l-not"></div></div>
+        <div class="scroll"><table><tr><th>A</th><th>NOT A</th></tr><tr><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td></tr></table></div>
+      </div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 3</span><h3>AND needs both</h3>
+      <ul>
+        <li>AND has two inputs. The answer is 1 only when <b>both</b> inputs are 1.</li>
+        <li>Everyday example: you can log in only if your username is correct AND your password is correct.</li>
+      </ul>
+      <div class="two">
+        <div class="try"><p class="label">Try it: tap the switches</p><div id="l-and"></div></div>
+        <div class="scroll"><table><tr><th>A</th><th>B</th><th>A AND B</th></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></table></div>
+      </div>
+      <div class="try" id="m3"></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 4</span><h3>OR needs at least one</h3>
+      <ul>
+        <li>OR has two inputs. The answer is 1 when <b>at least one</b> input is 1.</li>
+        <li>Everyday example: the alarm sounds if the door opens OR the window opens.</li>
+        <li>Watch out: if both are 1, the answer is still 1. In everyday speech "tea or coffee" usually means pick one. In logic, OR includes both.</li>
+      </ul>
+      <div class="two">
+        <div class="try"><p class="label">Try it: tap the switches</p><div id="l-or"></div></div>
+        <div class="scroll"><table><tr><th>A</th><th>B</th><th>A OR B</th></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></table></div>
+      </div>
+      <div class="try" id="m4"></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 5</span><h3>Setting out a truth table</h3>
+      <ul>
+        <li>A truth table lists <b>every possible combination</b> of the inputs and the answer for each one.</li>
+        <li>Each extra input doubles the rows: 1 input has 2 rows, 2 inputs have 4 rows, 3 inputs have 8 rows.</li>
+        <li>To make sure you never miss a row, fill the input columns in this pattern:
+          <ul><li>right-hand column: 0, 1, 0, 1, …</li><li>middle column: 0, 0, 1, 1, …</li><li>left-hand column: four 0s, then four 1s</li></ul></li>
+        <li>The rows are counting in binary, from 000 up to 111.</li>
+      </ul>
+      <div class="scroll"><table><tr><th>A</th><th>B</th><th>C</th></tr>
+        <tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td></tr>
+        <tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></table></div>
+      <div class="try" id="m5"></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 6</span><h3>Using more than one operator</h3>
+      <ul>
+        <li>Work out the brackets first, the same as BIDMAS in maths.</li>
+        <li>Add a <b>working column</b> to your table for each bracket and each NOT.</li>
+        <li>Then combine the working columns to get the final answer, Q.</li>
+      </ul>
+      <div class="eg"><p><b>Worked example:</b> Q = (A AND B) OR (NOT C), when A = 1, B = 0, C = 0.</p>
+        <p class="mono">A AND B = 1 AND 0 = 0</p><p class="mono">NOT C = NOT 0 = 1</p><p class="mono">Q = 0 OR 1 = 1</p></div>
+      <div class="try"><p class="label">Try it: change the inputs and watch each part</p><p class="mono">Q = (A AND B) OR (NOT C)</p><div id="l-combo"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 7</span><h3>Practise building truth tables</h3>
+      <p>The first tables are single operators. Later ones ask you to fill in the working columns as well as Q.</p>
+      <div class="try"><p class="label">Tap each ? to set 0 or 1</p><div id="p-logic"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Before you move on</span><h3>Mistakes to avoid</h3>
+      <ul>
+        <li>Writing 0 for 1 OR 1. OR is 1 when both inputs are 1.</li>
+        <li>Missing rows. Three inputs always means 8 rows.</li>
+        <li>Applying NOT to the wrong thing. NOT (A AND B) flips the answer to the whole bracket. (NOT A) AND B flips only A.</li>
+        <li>Skipping the working columns. They are where the marks are when something goes wrong.</li>
+      </ul>
+    </article>
+  </section>
+
+  <!-- ============ LESSON 2 ============ -->
+  <section class="lesson" id="gates" role="tabpanel" aria-labelledby="tab-gates" hidden>
+    <div class="intro"><h2>Lesson 2: Logic gates and adders</h2>
+      <p>Covers outcome 3: logic circuits with NOT, AND, NAND and OR gates, and a simple binary adder. Do Lesson 1 first, because every gate is one of the operators you met there.</p></div>
+
+    <article class="step"><span class="step-n">Step 1</span><h3>What a logic gate is</h3>
+      <ul>
+        <li>A logic gate is a tiny electronic circuit that carries out one logical operator.</li>
+        <li>Wires carry a signal that is either on (1) or off (0).</li>
+        <li>Inputs go in on the left. The output comes out on the right.</li>
+        <li>A processor is built from millions of these gates joined together.</li>
+      </ul>
+    </article>
+
+    <article class="step"><span class="step-n">Step 2</span><h3>The four gate symbols</h3>
+      <ul>
+        <li><b>AND</b>: flat back, round front, like a letter D.</li>
+        <li><b>OR</b>: curved back, pointed front.</li>
+        <li><b>NOT</b>: a triangle with a small circle.</li>
+        <li>The small circle always means "then flip the answer". So <b>NAND</b> is an AND gate with a circle: work out AND, then flip it.</li>
+      </ul>
+      <div class="try"><p class="label">Try it: tap the switches under each gate</p><div class="gates" id="gatecards"></div></div>
+      <div class="scroll"><table><tr><th>A</th><th>B</th><th>A AND B</th><th>A NAND B</th></tr><tr><td>0</td><td>0</td><td>0</td><td>1</td></tr><tr><td>0</td><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td><td>0</td></tr></table></div>
+      <div class="try" id="m22"></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 3</span><h3>Reading a circuit</h3>
+      <ul>
+        <li>Work from left to right.</li>
+        <li>Write the value (0 or 1) on the wire coming out of each gate before you move to the next gate.</li>
+        <li>The last gate gives the output, Q.</li>
+      </ul>
+      <div class="try"><p class="label">Try it: the blue numbers are the values on the wires</p><div id="l-circuit"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 4</span><h3>Drawing a circuit from an expression</h3>
+      <ol>
+        <li>Write the inputs (A, B, C) down the left-hand side.</li>
+        <li>Draw one gate for each bracket and connect it to its inputs. These gates sit nearest the inputs.</li>
+        <li>Draw the gate for the operator that joins the brackets. Connect the earlier gates into it.</li>
+        <li>Label the final output Q.</li>
+        <li>Check one row: pick values for A, B and C and follow them through.</li>
+      </ol>
+      <div class="eg"><p><b>Example:</b> Q = (A OR B) AND (NOT C)</p><p>The brackets give an OR gate (inputs A and B) and a NOT gate (input C). The AND joins them, so it is the last gate.</p></div>
+      <div class="try"><p class="label">Practise: choose the gate for each position</p><div id="p-build"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 5</span><h3>Truth table for a circuit</h3>
+      <ul>
+        <li>Add a working column for the wire coming out of each gate.</li>
+        <li>Fill the working columns first, then use them to find Q.</li>
+      </ul>
+      <div class="try"><p class="label">Practise: tap each ? to set 0 or 1</p><div id="p-ctable"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 6</span><h3>Adding in binary</h3>
+      <ul>
+        <li>Binary only has the digits 0 and 1, so there are only four sums to learn.</li>
+        <li>1 + 1 is two, which in binary is written <span class="mono">10</span>. You write 0 and carry 1, just like 5 + 5 in ordinary numbers: write 0, carry 1.</li>
+      </ul>
+      <div class="scroll"><table><tr><th>Sum</th><th>Answer</th><th>Write down</th><th>Carry</th></tr>
+        <tr><td>0 + 0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>0 + 1</td><td>1</td><td>1</td><td>0</td></tr><tr><td>1 + 0</td><td>1</td><td>1</td><td>0</td></tr><tr><td>1 + 1</td><td>10</td><td>0</td><td>1</td></tr></table></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 7</span><h3>The half adder</h3>
+      <ul>
+        <li>A half adder is a circuit that adds two bits, A and B.</li>
+        <li>It needs two outputs: <b>Sum</b> (the digit you write down) and <b>Carry</b> (the digit you carry).</li>
+        <li>Carry is 1 only when both inputs are 1. That is an AND gate.</li>
+        <li>Sum is 1 when the inputs are different. OR tells us "at least one is 1". NAND tells us "not both are 1". Put those two answers into an AND gate and you get "one, but not both".</li>
+      </ul>
+      <div class="try"><p class="label">Try it: add two bits</p><div id="l-half"></div></div>
+      <div class="try" id="m27"></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 8</span><h3>The full adder</h3>
+      <ul>
+        <li>When you add longer numbers, every column after the first may have a carry coming in. So you need to add <b>three</b> bits: A, B and the carry in.</li>
+        <li>A full adder does this. It is built from two half adders and an OR gate.</li>
+        <li>The first half adder adds A and B. The second adds the carry in to that answer. If either half adder produces a carry, the OR gate passes it on as the carry out.</li>
+        <li>1 + 1 + 1 is three, which is <span class="mono">11</span> in binary: Sum 1, Carry 1.</li>
+      </ul>
+      <div class="scroll"><svg class="circuit" viewBox="0 0 470 200" role="img" aria-label="Full adder made from two half adders and an OR gate. A and B enter the first half adder. Its sum goes to the second half adder with the carry in. The two carries go to an OR gate to give the carry out.">
+        <text x="10" y="50">A</text><text x="10" y="80">B</text><text x="268" y="14">Carry in</text>
+        <line class="w" x1="26" y1="45" x2="90" y2="45"/><line class="w" x1="26" y1="75" x2="90" y2="75"/>
+        <line class="w" x1="180" y1="60" x2="240" y2="60"/><line class="w" x1="285" y1="20" x2="285" y2="30"/>
+        <line class="w" x1="330" y1="60" x2="400" y2="60"/><text x="406" y="65">Sum</text>
+        <polyline class="w" points="135,90 135,170 356,170"/><polyline class="w" points="285,90 285,150 356,150"/>
+        <rect class="box" x="90" y="30" width="90" height="60" rx="4"/><rect class="box" x="240" y="30" width="90" height="60" rx="4"/>
+        <text x="135" y="58" text-anchor="middle">Half</text><text x="135" y="74" text-anchor="middle">adder 1</text>
+        <text x="285" y="58" text-anchor="middle">Half</text><text x="285" y="74" text-anchor="middle">adder 2</text>
+        <text class="sm" x="186" y="54">Sum</text><text class="sm" x="140" y="104">Carry</text><text class="sm" x="290" y="104">Carry</text>
+        <path class="g" d="M350,140 q10,20 0,40 q28,0 40,-20 q-12,-20 -40,-20 z"/><line class="w" x1="388" y1="160" x2="400" y2="160"/>
+        <text x="406" y="165">Carry out</text><text class="sm" x="370" y="134" text-anchor="middle">OR</text></svg></div>
+      <div class="try"><p class="label">Try it: add three bits</p><div id="l-full"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 9</span><h3>Practise the adder truth tables</h3>
+      <div class="try"><p class="label">Tap each ? to set 0 or 1</p><div id="p-adder"></div></div>
+    </article>
+  </section>
+
+  <!-- ============ LESSON 3 ============ -->
+  <section class="lesson" id="twos" role="tabpanel" aria-labelledby="tab-twos" hidden>
+    <div class="intro"><h2>Lesson 3: Negative numbers and floating point</h2>
+      <p>Supports outcome 4, criterion 4.4. You need to be comfortable with binary place values (128, 64, 32, 16, 8, 4, 2, 1) before you start.</p></div>
+
+    <article class="step"><span class="step-n">Step 1</span><h3>The problem: there is no minus sign</h3>
+      <ul>
+        <li>A register can only hold 0s and 1s. There is nowhere to write a minus sign.</li>
+        <li>So we need a way to store negative numbers using only bits.</li>
+        <li>The method computers use is called <b>two's complement</b>.</li>
+      </ul>
+    </article>
+
+    <article class="step"><span class="step-n">Step 2</span><h3>The idea: make the left-hand place value negative</h3>
+      <ul>
+        <li>In ordinary 4-bit binary the place values are 8, 4, 2, 1.</li>
+        <li>In 4-bit two's complement they are <b>−8</b>, 4, 2, 1. Only the left-hand one changes.</li>
+        <li>To read a number, add up the place values where there is a 1, exactly as before.</li>
+        <li>If the left-hand bit is 1, the number is negative. If it is 0, the number is positive or zero.</li>
+      </ul>
+      <div class="eg"><p class="mono">0101 = 4 + 1 = 5</p><p class="mono">1011 = −8 + 2 + 1 = −5</p><p class="mono">1111 = −8 + 4 + 2 + 1 = −1</p></div>
+      <div class="try"><p class="label">Try it: tap the bits (4-bit two's complement)</p><div id="x-tc4"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 3</span><h3>How big and how small</h3>
+      <ul>
+        <li>The same idea works for any number of bits. The left-hand place value is always the negative one.</li>
+        <li>The smallest number is a 1 followed by all 0s. The largest is a 0 followed by all 1s.</li>
+      </ul>
+      <div class="scroll"><table><tr><th>Bits</th><th>Place values</th><th>Smallest</th><th>Largest</th></tr>
+        <tr><td>3</td><td>−4 2 1</td><td>100 = −4</td><td>011 = 3</td></tr>
+        <tr><td>4</td><td>−8 4 2 1</td><td>1000 = −8</td><td>0111 = 7</td></tr>
+        <tr><td>8</td><td>−128 64 32 16 8 4 2 1</td><td>1000 0000 = −128</td><td>0111 1111 = 127</td></tr></table></div>
+      <div class="try"><p class="label">Try it: tap the bits (8-bit two's complement)</p><div id="x-tc8"></div></div>
+      <div class="try" id="m33"></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 4</span><h3>Writing a negative number: flip the bits and add 1</h3>
+      <ol>
+        <li>Write the positive number in binary, using all the bits.</li>
+        <li>Flip every bit: each 0 becomes 1 and each 1 becomes 0.</li>
+        <li>Add 1.</li>
+        <li>Check your answer using the place values.</li>
+      </ol>
+      <div class="two">
+        <div class="eg"><p><b>−5 in 4 bits</b></p><p class="mono">+5 &nbsp;= 0101</p><p class="mono">flip = 1010</p><p class="mono">+ 1 &nbsp;= 1011</p><p class="mono">Check: −8 + 2 + 1 = −5</p></div>
+        <div class="eg"><p><b>−20 in 8 bits</b></p><p class="mono">+20 &nbsp;= 0001 0100</p><p class="mono">flip = 1110 1011</p><p class="mono">+ 1 &nbsp;= 1110 1100</p><p class="mono">Check: −128 + 64 + 32 + 8 + 4 = −20</p></div>
+      </div>
+      <div class="try"><p class="label">Practise two's complement</p><div id="p-tc"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 5</span><h3>Binary fractions</h3>
+      <ul>
+        <li>Moving left, each binary place value doubles: 1, 2, 4, 8.</li>
+        <li>Moving right past the binary point, each one halves: ½, ¼, ⅛, 1⁄16.</li>
+        <li>As decimals these are 0.5, 0.25, 0.125 and 0.0625.</li>
+        <li>A <b>fixed point</b> number keeps the point in one agreed place. Here we use 4 bits before the point and 4 after.</li>
+      </ul>
+      <div class="eg"><p class="mono">0101.1100 = 4 + 1 + ½ + ¼ = 5.75</p><p class="mono">0010.0100 = 2 + ¼ = 2.25</p></div>
+      <div class="try"><p class="label">Try it: tap the bits (fixed point)</p><div id="x-fx"></div></div>
+      <div class="try"><p class="label">Practise fixed point</p><div id="p-fx"></div></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 6</span><h3>Floating point: the same idea as standard form</h3>
+      <ul>
+        <li>In GCSE maths you met standard form: 3.2 × 10⁴ = 32 000. The power of ten tells you how far to move the decimal point.</li>
+        <li>Floating point does the same thing in binary, using powers of <b>two</b>:</li>
+      </ul>
+      <p class="mono" style="font-size:1.1rem">value = mantissa × 2<sup>exponent</sup></p>
+      <ul>
+        <li>The <b>mantissa</b> holds the digits of the number.</li>
+        <li>The <b>exponent</b> says how many places to move the binary point. Positive moves it right (the number gets bigger). Negative moves it left (the number gets smaller).</li>
+        <li>Multiplying by 2 doubles. Multiplying by ½ halves.</li>
+        <li>This lets a small register hold very large and very small numbers.</li>
+      </ul>
+      <div class="scroll"><table><tr><th>Exponent</th><td>−2</td><td>−1</td><td>0</td><td>1</td><td>2</td><td>3</td></tr><tr><th>Multiply by</th><td>¼</td><td>½</td><td>1</td><td>2</td><td>4</td><td>8</td></tr></table></div>
+    </article>
+
+    <article class="step"><span class="step-n">Step 7</span><h3>Reading a floating point register</h3>
+      <ul>
+        <li>Our 8-bit register is split into a 5-bit mantissa and a 3-bit exponent.</li>
+        <li>Both parts are in two's complement, which is why you needed Steps 1 to 4.</li>
+        <li>Mantissa place values: <span class="mono">−1 . ½ ¼ ⅛ 1⁄16</span> (the binary point comes after the first bit).</li>
+        <li>Exponent place values: <span class="mono">−4 2 1</span>.</li>
+      </ul>
+      <ol>
+        <li>Work out the mantissa.</li>
+        <li>Work out the exponent.</li>
+        <li>Multiply the mantissa by 2 to the power of the exponent.</li>
+      </ol>
+      <div class="two">
+        <div class="eg"><p><b>01010 010</b></p><p class="mono">Mantissa 0.1010 = ½ + ⅛ = 0.625</p><p class="mono">Exponent 010 = 2</p><p class="mono">0.625 × 4 = 2.5</p></div>
+        <div class="eg"><p><b>01100 111</b></p><p class="mono">Mantissa 0.1100 = ½ + ¼ = 0.75</p><p class="mono">Exponent 111 = −4 + 2 + 1 = −1</p><p class="mono">0.75 × ½ = 0.375</p></div>
+        <div class="eg"><p><b>10110 011</b></p><p class="mono">Mantissa 1.0110 = −1 + ¼ + ⅛ = −0.625</p><p class="mono">Exponent 011 = 3</p><p class="mono">−0.625 × 8 = −5</p></div>
+      </div>
+      <div class="try"><p class="label">Try it: tap the bits</p><div id="x-float"></div></div>
+      <p class="note">This page uses a 5-bit mantissa followed by a 3-bit exponent. Other courses split the bits differently. Check which layout your exam uses.</p>
+    </article>
+
+    <article class="step"><span class="step-n">Step 8</span><h3>Practise floating point</h3>
+      <p>Questions start with positive numbers, then bring in negative exponents and negative mantissas.</p>
+      <div class="try"><div id="p-float"></div></div>
+    </article>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r)=>(r||document).querySelector(s);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rnd(0,a.length-1)];
+const fmt=n=>(n<0?"−":"")+Math.abs(n);
+let uid=0;
+
+/* ---------- tabs ---------- */
+const LS=["logic","gates","twos"];
+function show(l){if(!LS.includes(l))l="logic";LS.forEach(id=>{document.getElementById(id).hidden=id!==l;document.getElementById("tab-"+id).setAttribute("aria-selected",id===l)})}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{show(b.dataset.l);try{location.hash=b.dataset.l}catch(e){}window.scrollTo(0,0)});
+window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
+show(location.hash.slice(1));
+
+/* ---------- small building blocks ---------- */
+const lamp=(label,v)=>`<span class="lamp${v?" on":""}">${label} = <b>${v}</b></span>`;
+function live(host,vars,labels,render){
+  const st={};vars.forEach(v=>st[v]=0);
+  host.innerHTML=`<div class="q"><div class="switches">${vars.map((v,i)=>`<button type="button" class="sw" data-v="${v}" aria-pressed="false"><span>${v}${labels&&labels[i]?`<small>${labels[i]}</small>`:""}</span><b>0</b></button>`).join("")}</div><div class="out" aria-live="polite"></div></div>`;
+  const out=$(".out",host);
+  const up=()=>{host.querySelectorAll(".sw").forEach(b=>{const v=st[b.dataset.v];b.setAttribute("aria-pressed",!!v);$("b",b).textContent=v});out.innerHTML=render(st)};
+  host.addEventListener("click",e=>{const b=e.target.closest(".sw");if(!b)return;st[b.dataset.v]^=1;up()});
+  up();
+}
+function mcq(sel,q,opts,ans,why){
+  const host=$(sel);
+  host.innerHTML=`<p class="prompt"><b>Quick check.</b> ${q}</p><div class="row">${opts.map((o,i)=>`<button type="button" class="btn opt" data-i="${i}">${o}</button>`).join("")}</div><p class="fb" role="status"></p>`;
+  host.addEventListener("click",e=>{const b=e.target.closest(".opt");if(!b)return;const ok=+b.dataset.i===ans,fb=$(".fb",host);
+    host.querySelectorAll(".opt").forEach(x=>x.classList.remove("right","wrong"));b.classList.add(ok?"right":"wrong");
+    fb.className="fb "+(ok?"ok":"no");fb.textContent=ok?"Correct. "+why:"Not quite. Read the step again and have another go."});
+}
+function typedQ(host,gens,placeholder){
+  const id="in"+(++uid);let q,i=0;
+  host.innerHTML=`<div class="q"><div class="prompt"></div>
+    <div class="row"><input type="text" id="${id}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" placeholder="${placeholder||"Your answer"}">
+    <button class="btn primary" type="button" data-a="check">Check</button></div>
+    <p class="fb" role="status"></p>
+    <div class="row"><button class="btn" type="button" data-a="show">Show working</button><button class="btn" type="button" data-a="new">Next question</button></div>
+    <div class="work" hidden></div></div>`;
+  const inp=$("input",host),fb=$(".fb",host),work=$(".work",host);
+  function load(){q=gens[i++%gens.length]();$(".prompt",host).innerHTML=q.prompt;inp.value="";fb.textContent="";fb.className="fb";work.hidden=true;work.innerHTML=q.work}
+  function check(){const v=inp.value.trim();if(!v){fb.className="fb info";fb.textContent="Type an answer first.";return}
+    const r=q.check(v);
+    if(r===true){fb.className="fb ok";fb.textContent="Correct."}
+    else if(typeof r==="string"){fb.className="fb info";fb.textContent=r}
+    else{fb.className="fb no";fb.textContent="Not quite. Try again, or show the working."}}
+  host.addEventListener("click",e=>{const a=e.target.dataset&&e.target.dataset.a;if(a==="check")check();if(a==="show")work.hidden=!work.hidden;if(a==="new")load()});
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")check()});
+  load();
+}
+function ttWidget(host,list){
+  let i=0,q,vals,n,rows;
+  const bits=r=>q.vars.map((_,j)=>(r>>(n-1-j))&1);
+  function tableHTML(answer){
+    const steps=answer?(q.steps||[]):[];
+    let h=`<div class="scroll"><table><tr>${q.vars.map(v=>`<th>${v}</th>`).join("")}${steps.map(s=>`<th>${s[0]}</th>`).join("")}${q.outs.map(o=>`<th>${o[0]}</th>`).join("")}</tr>`;
+    for(let r=0;r<rows;r++){const b=bits(r);
+      h+=`<tr>${b.map(x=>`<td>${x}</td>`).join("")}${steps.map(s=>`<td>${s[1](...b)}</td>`).join("")}`+
+        q.outs.map((o,k)=>answer?`<td><b>${o[1](...b)}</b></td>`:`<td class="out"><button type="button" class="cell" data-c="${r*q.outs.length+k}" aria-label="${o[0]} for inputs ${b.join(" ")}">?</button></td>`).join("")+`</tr>`}
+    return h+"</table></div>";
+  }
+  function load(){q=list[i++%list.length];n=q.vars.length;rows=1<<n;vals=Array(rows*q.outs.length).fill(null);
+    host.innerHTML=`<div class="q"><div class="prompt">${q.prompt}</div>${tableHTML(false)}
+      <p class="fb" role="status"></p>
+      <div class="row"><button class="btn primary" type="button" data-a="check">Check</button><button class="btn" type="button" data-a="show">Show answer</button><button class="btn" type="button" data-a="new">Next table</button></div>
+      <div class="work" hidden>${q.note?`<p>${q.note}</p>`:""}${tableHTML(true)}</div></div>`}
+  host.addEventListener("click",e=>{
+    const t=e.target,fb=$(".fb",host);
+    if(t.dataset.c!==undefined){const c=+t.dataset.c;vals[c]=vals[c]===0?1:0;t.textContent=vals[c];t.className="cell set";fb.textContent="";return}
+    const a=t.dataset.a;
+    if(a==="new")load();
+    if(a==="show"){const w=$(".work",host);w.hidden=!w.hidden}
+    if(a==="check"){
+      if(vals.includes(null)){fb.className="fb info";fb.textContent="Fill in every ? first.";return}
+      let ok=true;
+      host.querySelectorAll(".cell").forEach(b=>{const c=+b.dataset.c,r=Math.floor(c/q.outs.length),k=c%q.outs.length,good=q.outs[k][1](...bits(r))===vals[c];
+        b.className="cell set "+(good?"right":"wrong");if(!good)ok=false});
+      if(ok){fb.className="fb ok";fb.textContent="Correct."}
+      else{fb.className="fb no";fb.textContent="Some answers are wrong (shown in red). Tap to change them and check again."}
+    }
+  });
+  load();
+}
+const N=x=>1-x;
+
+/* ============ LESSON 1 ============ */
+mcq("#m1","A = \"the door is open\". The door is closed. What is A?",["0","1"],0,"The statement is false, so A = 0.");
+live($("#l-not"),["A"],["It is raining"],s=>lamp("NOT A",N(s.A))+`<span class="say">${s.A?"It is raining, so \"not raining\" is false.":"It is dry, so \"not raining\" is true."}</span>`);
+live($("#l-and"),["A","B"],["Username correct","Password correct"],s=>lamp("A AND B",s.A&s.B)+`<span class="say">${s.A&s.B?"Both are correct: you can log in.":"At least one is wrong: no log in."}</span>`);
+live($("#l-or"),["A","B"],["Door open","Window open"],s=>lamp("A OR B",s.A|s.B)+`<span class="say">${s.A|s.B?"Something is open: the alarm sounds.":"Everything is shut: the alarm stays quiet."}</span>`);
+mcq("#m3","A = 1 and B = 0. What is A AND B?",["0","1"],0,"AND needs both inputs to be 1.");
+mcq("#m4","A = 1 and B = 1. What is A OR B?",["0","1"],1,"OR is 1 when at least one input is 1, and that includes both.");
+mcq("#m5","How many rows does a truth table with 3 inputs need?",["6","8","9"],1,"2 × 2 × 2 = 8 rows.");
+live($("#l-combo"),["A","B","C"],null,s=>lamp("A AND B",s.A&s.B)+lamp("NOT C",N(s.C))+lamp("Q",(s.A&s.B)|N(s.C)));
+ttWidget($("#p-logic"),[
+  {prompt:"Complete the truth table for <b class='mono'>A AND B</b>.",vars:["A","B"],outs:[["A AND B",(a,b)=>a&b]],note:"AND is 1 only when both inputs are 1."},
+  {prompt:"Complete the truth table for <b class='mono'>A OR B</b>.",vars:["A","B"],outs:[["A OR B",(a,b)=>a|b]],note:"OR is 1 when at least one input is 1."},
+  {prompt:"Complete the truth table for <b class='mono'>NOT A</b>.",vars:["A"],outs:[["NOT A",a=>N(a)]],note:"NOT flips the input."},
+  {prompt:"<b class='mono'>Q = (A AND B) OR C</b>. Fill in the working column first, then Q.",vars:["A","B","C"],outs:[["A AND B",(a,b,c)=>a&b],["Q",(a,b,c)=>(a&b)|c]],note:"Q is the A AND B column OR the C column."},
+  {prompt:"<b class='mono'>Q = (A OR B) AND (NOT C)</b>. Fill in both working columns, then Q.",vars:["A","B","C"],outs:[["A OR B",(a,b,c)=>a|b],["NOT C",(a,b,c)=>N(c)],["Q",(a,b,c)=>(a|b)&N(c)]],note:"Q is 1 only when both working columns are 1."},
+  {prompt:"<b class='mono'>Q = (NOT A) AND (B OR C)</b>. This time only Q is marked. Use working columns on paper.",vars:["A","B","C"],steps:[["NOT A",(a,b,c)=>N(a)],["B OR C",(a,b,c)=>b|c]],outs:[["Q",(a,b,c)=>N(a)&(b|c)]]},
+  {prompt:"<b class='mono'>Q = NOT (A AND B) OR C</b>. Only Q is marked.",vars:["A","B","C"],steps:[["A AND B",(a,b,c)=>a&b],["NOT (A AND B)",(a,b,c)=>N(a&b)]],outs:[["Q",(a,b,c)=>N(a&b)|c]]}
+]);
+
+/* ============ LESSON 2 ============ */
+function gate(t,x,y){ // 50 wide, 40 tall; output at (x+50, y+20)
+  const out=`<line class="w" x1="${x+38}" y1="${y+20}" x2="${x+50}" y2="${y+20}"/>`;
+  if(t==="AND") return out+`<path class="g" d="M${x},${y} h20 a20,20 0 0 1 0,40 h-20 z"/>`;
+  if(t==="NAND")return out+`<path class="g" d="M${x},${y} h20 a20,20 0 0 1 0,40 h-20 z"/><circle class="g" cx="${x+44}" cy="${y+20}" r="4"/>`;
+  if(t==="OR")  return out+`<path class="g" d="M${x},${y} q10,20 0,40 q28,0 40,-20 q-12,-20 -40,-20 z"/>`;
+  if(t==="NOT") return out+`<path class="g" d="M${x},${y+5} l30,15 l-30,15 z"/><circle class="g" cx="${x+34}" cy="${y+20}" r="4"/>`;
+  if(t==="WIRE")return `<line class="w" x1="${x}" y1="${y+20}" x2="${x+50}" y2="${y+20}"/>`;
+  return `<rect class="slot" x="${x}" y="${y}" width="44" height="40" rx="4"/><text x="${x+22}" y="${y+25}" text-anchor="middle">?</text>`;
+}
+const F={AND:(x,y)=>x&y,OR:(x,y)=>x|y,NAND:(x,y)=>1-(x&y)};
+const G2=(s,c)=>s.g2==="NOT"?1-c:c;
+const evalC=(s,a,b,c)=>F[s.g3](F[s.g1](a,b),G2(s,c));
+const exprC=s=>`(A ${s.g1} B) ${s.g3} ${s.g2==="NOT"?"(NOT C)":"C"}`;
+
+/* gate cards */
+(function(){
+  const info={NOT:"Flips the input.",AND:"1 only when both inputs are 1.",OR:"1 when at least one input is 1.",NAND:"AND, then flipped. 0 only when both inputs are 1."};
+  const host=$("#gatecards");
+  host.innerHTML=["NOT","AND","OR","NAND"].map(t=>`<div class="gatecard"><h4>${t}</h4><div id="gc-${t}"></div><p>${info[t]}</p></div>`).join("");
+  ["NOT","AND","OR","NAND"].forEach(t=>{
+    const two=t!=="NOT";
+    live($("#gc-"+t),two?["A","B"]:["A"],null,s=>{
+      const q=two?F[t](s.A,s.B):1-s.A;
+      return `<svg class="circuit" viewBox="0 0 120 50" role="img" aria-label="${t} gate, output ${q}">${two?
+        `<text class="v" x="4" y="20">${s.A}</text><text class="v" x="4" y="40">${s.B}</text><line class="w" x1="16" y1="15" x2="42" y2="15"/><line class="w" x1="16" y1="35" x2="42" y2="35"/>`:
+        `<text class="v" x="4" y="30">${s.A}</text><line class="w" x1="16" y1="25" x2="38" y2="25"/>`}${gate(t,36,5)}<text class="v" x="94" y="30">${q}</text></svg>`+lamp("Output",q);
+    });
+  });
+})();
+mcq("#m22","A NAND gate has inputs 1 and 1. What is the output?",["0","1"],0,"1 AND 1 is 1, and the circle flips it to 0.");
+
+function circuit3(s,v){
+  const L=(n,y,val)=>`<text x="6" y="${y+5}">${n}${v?" = "+val:""}</text>`, x0=v?54:26;
+  return `<svg class="circuit" viewBox="0 0 450 200" role="img" aria-label="Circuit with inputs A, B and C, three gate positions and output Q">
+    ${L("A",50,v&&v.a)}${L("B",70,v&&v.b)}${L("C",150,v&&v.c)}
+    <line class="w" x1="${x0}" y1="50" x2="136" y2="50"/><line class="w" x1="${x0}" y1="70" x2="136" y2="70"/><line class="w" x1="${x0}" y1="150" x2="134" y2="150"/>
+    <polyline class="w" points="180,60 250,60 250,95 296,95"/><polyline class="w" points="180,150 250,150 250,115 296,115"/>
+    <line class="w" x1="340" y1="105" x2="385" y2="105"/><text ${v?'class="v" ':''}x="392" y="110">Q${v?" = "+v.q:""}</text>
+    ${gate(s.g1,130,40)}${gate(s.g2,130,130)}${gate(s.g3,290,85)}
+    ${v?`<text class="v" x="208" y="53">${v.g1}</text><text class="v" x="208" y="143">${v.g2}</text>`:""}
+    <text class="sm" x="152" y="32" text-anchor="middle">${s.g1||"GATE 1"}</text><text class="sm" x="152" y="186" text-anchor="middle">${s.g2==="WIRE"?"NO GATE":(s.g2||"GATE 2")}</text><text class="sm" x="312" y="77" text-anchor="middle">${s.g3||"GATE 3"}</text></svg>`;
+}
+(function(){
+  const s={g1:"AND",g2:"NOT",g3:"OR"},host=$("#l-circuit");
+  live(host,["A","B","C"],null,st=>{
+    const g1=st.A&st.B,g2=1-st.C,q=g1|g2;
+    return `<div class="scroll" style="flex-basis:100%">${circuit3(s,{a:st.A,b:st.B,c:st.C,g1,g2,q})}</div><span class="say">A AND B = ${g1}, NOT C = ${g2}, so Q = ${g1} OR ${g2} = ${q}.</span>`;
+  });
+})();
+
+/* circuit builder */
+(function(){
+  const host=$("#p-build");let q,sel;
+  const opts=(two,id,lab)=>`<label for="${id}">${lab}<select id="${id}"><option value="">Choose…</option>${(two?["AND","OR","NAND"]:["NOT","WIRE"]).map(o=>`<option value="${o}">${o==="WIRE"?"No gate (plain wire)":o}</option>`).join("")}</select></label>`;
+  function ttable(s){let h=`<div class="scroll"><table><tr><th>A</th><th>B</th><th>C</th><th>Q</th></tr>`;
+    for(let r=0;r<8;r++){const a=r>>2&1,b=r>>1&1,c=r&1;h+=`<tr><td>${a}</td><td>${b}</td><td>${c}</td><td><b>${evalC(s,a,b,c)}</b></td></tr>`}return h+"</table></div>"}
+  function load(){
+    q={g1:pick(["AND","OR","NAND"]),g2:pick(["NOT","NOT","WIRE"]),g3:pick(["AND","OR","NAND"])};sel={g1:"",g2:"",g3:""};
+    host.innerHTML=`<div class="q"><p class="prompt">Build the circuit for <b class="mono">Q = ${exprC(q)}</b>.</p>
+      <div class="scroll" id="cdraw">${circuit3(sel)}</div>
+      <div class="picks">${opts(true,"g1","Gate 1 (A, B)")}${opts(false,"g2","Gate 2 (C)")}${opts(true,"g3","Gate 3 (output)")}</div>
+      <p class="fb" role="status"></p>
+      <div class="row"><button class="btn primary" type="button" data-a="check">Check</button><button class="btn" type="button" data-a="show">Show answer</button><button class="btn" type="button" data-a="new">New circuit</button></div>
+      <div class="work" hidden></div></div>`;
+  }
+  host.addEventListener("change",e=>{if(e.target.tagName==="SELECT"){sel[e.target.id]=e.target.value;$("#cdraw",host).innerHTML=circuit3(sel);$(".fb",host).textContent=""}});
+  host.addEventListener("click",e=>{
+    const a=e.target.dataset.a,fb=$(".fb",host),w=$(".work",host);
+    if(a==="new")load();
+    if(a==="show"){w.hidden=false;w.innerHTML=`<p>Gate 1 is ${q.g1}, gate 2 is ${q.g2==="NOT"?"NOT":"a plain wire (C goes straight in)"}, gate 3 is ${q.g3}.</p>${circuit3(q)}${ttable(q)}`}
+    if(a==="check"){
+      if(!sel.g1||!sel.g2||!sel.g3){fb.className="fb info";fb.textContent="Choose something for all three positions first.";return}
+      let ok=true;for(let r=0;r<8;r++)if(evalC(sel,r>>2&1,r>>1&1,r&1)!==evalC(q,r>>2&1,r>>1&1,r&1))ok=false;
+      if(ok){fb.className="fb ok";fb.textContent="Correct. The truth table for your circuit is below.";w.hidden=false;w.innerHTML=ttable(sel)}
+      else{fb.className="fb no";fb.textContent="Not quite. Match each bracket in the expression to the gate nearest those inputs."}
+    }
+  });
+  load();
+})();
+
+ttWidget($("#p-ctable"),[{g1:"AND",g2:"WIRE",g3:"OR"},{g1:"OR",g2:"NOT",g3:"AND"},{g1:"NAND",g2:"WIRE",g3:"AND"},{g1:"OR",g2:"NOT",g3:"NAND"}].map(s=>{
+  const w1=`A ${s.g1} B`, outs=[[w1,(a,b,c)=>F[s.g1](a,b)]];
+  if(s.g2==="NOT")outs.push(["NOT C",(a,b,c)=>1-c]);
+  outs.push(["Q",(a,b,c)=>evalC(s,a,b,c)]);
+  return {prompt:`<p>Complete the truth table for this circuit. Fill in the working column${s.g2==="NOT"?"s":""} first.</p><div class="scroll">${circuit3(s)}</div>`,vars:["A","B","C"],outs,note:`This circuit is Q = ${exprC(s)}.`};
+}));
+
+function halfAdder(v){
+  const x0=v?54:26;
+  return `<svg class="circuit" viewBox="0 0 450 220" role="img" aria-label="Half adder: A and B feed an OR gate and a NAND gate, whose outputs feed an AND gate to give Sum. A and B also feed a second AND gate to give Carry.">
+  <text x="6" y="40">A${v?" = "+v.a:""}</text><text x="6" y="60">B${v?" = "+v.b:""}</text>
+  <line class="w" x1="${x0}" y1="35" x2="136" y2="35"/><line class="w" x1="${x0}" y1="55" x2="136" y2="55"/>
+  <polyline class="w" points="62,35 62,175 136,175"/><line class="w" x1="62" y1="100" x2="136" y2="100"/>
+  <polyline class="w" points="87,55 87,195 136,195"/><line class="w" x1="87" y1="120" x2="136" y2="120"/>
+  <circle class="dot" cx="62" cy="35" r="3.5"/><circle class="dot" cx="62" cy="100" r="3.5"/><circle class="dot" cx="87" cy="55" r="3.5"/><circle class="dot" cx="87" cy="120" r="3.5"/>
+  <polyline class="w" points="180,45 250,45 250,70 296,70"/><polyline class="w" points="180,110 250,110 250,90 296,90"/>
+  <line class="w" x1="340" y1="80" x2="362" y2="80"/><text ${v?'class="v" ':''}x="368" y="85">Sum${v?" = "+v.s:""}</text>
+  <line class="w" x1="180" y1="185" x2="362" y2="185"/><text ${v?'class="v" ':''}x="368" y="190">Carry${v?" = "+v.c:""}</text>
+  ${gate("OR",130,25)}${gate("NAND",130,90)}${gate("AND",130,165)}${gate("AND",290,60)}
+  ${v?`<text class="v" x="208" y="38">${v.or}</text><text class="v" x="208" y="103">${v.nand}</text>`:""}
+  <text class="sm" x="150" y="20" text-anchor="middle">OR</text><text class="sm" x="150" y="86" text-anchor="middle">NAND</text><text class="sm" x="150" y="161" text-anchor="middle">AND</text><text class="sm" x="310" y="55" text-anchor="middle">AND</text></svg>`;
+}
+live($("#l-half"),["A","B"],null,s=>{const or=s.A|s.B,nand=1-(s.A&s.B),sum=or&nand,c=s.A&s.B;
+  return `<div class="scroll" style="flex-basis:100%">${halfAdder({a:s.A,b:s.B,or,nand,s:sum,c})}</div>${lamp("Sum",sum)}${lamp("Carry",c)}<span class="say">${s.A} + ${s.B} = ${(s.A+s.B).toString(2)} in binary (${s.A+s.B} in ordinary numbers).</span>`});
+mcq("#m27","Which gate gives the Carry output of a half adder?",["OR","AND","NOT"],1,"You only carry when both bits are 1, which is what AND tests.");
+live($("#l-full"),["A","B","Cin"],[null,null,"Carry in"],s=>{const t=s.A+s.B+s.Cin;
+  return lamp("Sum",t&1)+lamp("Carry out",t>>1)+`<span class="say">${s.A} + ${s.B} + ${s.Cin} = ${t.toString(2)} in binary (${t} in ordinary numbers).</span>`});
+ttWidget($("#p-adder"),[
+  {prompt:"<b>Half adder.</b> Complete the Sum and Carry columns for adding A and B.",vars:["A","B"],outs:[["Sum",(a,b)=>a^b],["Carry",(a,b)=>a&b]],note:"Add the bits in each row. 1 + 1 = 10 in binary: Sum 0, Carry 1."},
+  {prompt:"<b>Full adder.</b> Complete the Sum and Carry out columns for adding A, B and the carry in.",vars:["A","B","Cin"],outs:[["Sum",(a,b,c)=>a^b^c],["Cout",(a,b,c)=>(a+b+c)>>1]],note:"Count the 1s in each row. One 1: Sum 1. Two 1s: Sum 0, Carry 1. Three 1s: Sum 1, Carry 1."}
+]);
+
+/* ============ LESSON 3 ============ */
+const sumText=(b,pv)=>{const p=pv.filter((_,i)=>b[i]);return p.length?p.map((x,i)=>i?(x<0?"− "+Math.abs(x):"+ "+x):fmt(x)).join(" ")+" = "+fmt(p.reduce((s,x)=>s+x,0)):"0"};
+function bitRow(b,lab,point,off){ // returns [labelCells, bitCells]
+  let l="",c="";
+  b.forEach((x,i)=>{if(point===i){l+=`<td class="pt"></td>`;c+=`<td class="pt">.</td>`}
+    l+=`<td class="pv">${lab[i]}</td>`;c+=`<td class="bitc"><button type="button" class="cell set${x?" on":""}" data-b="${i+(off||0)}" aria-label="Bit with place value ${lab[i]}, currently ${x}">${x}</button></td>`});
+  return [l,c];
+}
+function bitsExplorer(host,cfg){
+  const b=cfg.start.slice();
+  function draw(focus){
+    const [l,c]=bitRow(b,cfg.lab,cfg.point);
+    host.innerHTML=`<div class="q"><div class="scroll"><table><tr>${l}</tr><tr>${c}</tr></table></div><p class="mono" aria-live="polite">${sumText(b,cfg.pv)}</p></div>`;
+    if(focus!==undefined){const f=host.querySelector(`[data-b="${focus}"]`);if(f)f.focus()}
+  }
+  host.addEventListener("click",e=>{const t=e.target.closest("[data-b]");if(!t)return;const i=+t.dataset.b;b[i]^=1;draw(i)});
+  draw();
+}
+bitsExplorer($("#x-tc4"),{pv:[-8,4,2,1],lab:["−8","4","2","1"],start:[1,0,1,1]});
+bitsExplorer($("#x-tc8"),{pv:[-128,64,32,16,8,4,2,1],lab:["−128","64","32","16","8","4","2","1"],start:[1,1,1,0,1,1,0,0]});
+bitsExplorer($("#x-fx"),{pv:[8,4,2,1,.5,.25,.125,.0625],lab:["8","4","2","1","½","¼","⅛","1⁄16"],point:4,start:[0,1,0,1,1,1,0,0]});
+mcq("#m33","Which of these 8-bit two's complement numbers is negative?",["0111 1111","1000 0001"],1,"The left-hand bit is 1, so the −128 is switched on. It equals −128 + 1 = −127.");
+
+const MPV=[-1,.5,.25,.125,.0625],MLAB=["−1","½","¼","⅛","1⁄16"],EPV=[-4,2,1],ELAB=["−4","2","1"];
+const pow=e=>e>=0?String(2**e):"1⁄"+2**(-e);
+(function(){
+  const host=$("#x-float"),b=[0,1,0,1,0,0,1,0];
+  function draw(focus){
+    const mb=b.slice(0,5),eb=b.slice(5),m=mb.reduce((s,x,i)=>s+x*MPV[i],0),e=eb.reduce((s,x,i)=>s+x*EPV[i],0);
+    const [ml,mc]=bitRow(mb,MLAB,1,0),[el,ec]=bitRow(eb,ELAB,undefined,5);
+    host.innerHTML=`<div class="q"><div class="scroll"><table><tr><th colspan="6">Mantissa</th><th class="gap"></th><th colspan="3">Exponent</th></tr>
+      <tr>${ml}<td class="gap"></td>${el}</tr><tr>${mc}<td class="gap"></td>${ec}</tr></table></div>
+      <div aria-live="polite"><p class="mono">Mantissa: ${sumText(mb,MPV)}</p><p class="mono">Exponent: ${sumText(eb,EPV)}</p>
+      <p class="mono"><b>Value = ${fmt(m)} × 2<sup>${fmt(e)}</sup> = ${fmt(m)} × ${pow(e)} = ${fmt(m*2**e)}</b></p></div></div>`;
+    if(focus!==undefined){const f=host.querySelector(`[data-b="${focus}"]`);if(f)f.focus()}
+  }
+  host.addEventListener("click",ev=>{const t=ev.target.closest("[data-b]");if(!t)return;const i=+t.dataset.b;b[i]^=1;draw(i)});
+  draw();
+})();
+
+const bin=(n,w)=>n.toString(2).padStart(w,"0");
+const nib=s=>s.replace(/(.{4})(?=.)/g,"$1 ");
+const tc=(n,w)=>bin((n+2**w)%2**w,w);
+const tcPV=w=>Array.from({length:w},(_,i)=>i?2**(w-1-i):-(2**(w-1)));
+function pvTable(bits,pv,lab){const b=[...bits].map(Number);
+  return `<div class="scroll"><table><tr>${(lab||pv.map(fmt)).map(p=>`<th>${p}</th>`).join("")}</tr><tr>${b.map(x=>`<td>${x}</td>`).join("")}</tr></table></div><p class="mono">${sumText(b,pv)}</p>`}
+const chkInt=x=>v=>{v=v.replace(/\s/g,"").replace("−","-");return /^-?\d+$/.test(v)?Number(v)===x:"Type a whole number. Use - for negative numbers."};
+const chkNum=x=>v=>{v=v.replace(/\s/g,"").replace("−","-");return /^-?\d*\.?\d+$/.test(v)?Math.abs(parseFloat(v)-x)<1e-9:"Type a number. Use a decimal point if needed and - for negative numbers."};
+const chkBits=(s,w)=>v=>{v=v.replace(/[\s_]/g,"");if(!/^[01]+$/.test(v))return "Use only 0s and 1s.";if(v.length!==w)return `Give exactly ${w} bits.`;return v===s};
+function flipWork(n,w){const p=bin(-n,w),f=[...p].map(x=>x==="1"?"0":"1").join(""),r=tc(n,w),sp=w===8?nib:(x=>x);
+  return `<p class="mono">+${-n} = ${sp(p)}</p><p class="mono">flip = ${sp(f)}</p><p class="mono">add 1 = ${sp(r)}</p><p>Check with the place values:</p>${pvTable(r,tcPV(w))}<p class="mono ans">${fmt(n)} = ${sp(r)}</p>`}
+
+typedQ($("#p-tc"),[
+  ()=>{const n=rnd(-8,-1),s=tc(n,4);return {prompt:`What is the denary value of the 4-bit two's complement number <b class="mono">${s}</b>?`,check:chkInt(n),work:pvTable(s,tcPV(4))+`<p class="mono ans">${s} = ${fmt(n)}</p>`}},
+  ()=>{const n=rnd(-7,-1);return {prompt:`Write <b class="mono">${fmt(n)}</b> as a 4-bit two's complement number.`,check:chkBits(tc(n,4),4),work:flipWork(n,4)}},
+  ()=>{const n=pick([-4,-3,-2,-1,1,2,3]),s=tc(n,3);return {prompt:`A 3-bit two's complement exponent holds <b class="mono">${s}</b>. What is its denary value?`,check:chkInt(n),work:pvTable(s,tcPV(3))+`<p class="mono ans">${s} = ${fmt(n)}</p>`}},
+  ()=>{const n=rnd(-120,-2),s=tc(n,8);return {prompt:`What is the denary value of the 8-bit two's complement number <b class="mono">${nib(s)}</b>?`,check:chkInt(n),work:pvTable(s,tcPV(8))+`<p class="mono ans">${nib(s)} = ${fmt(n)}</p>`}},
+  ()=>{const n=rnd(-100,-2);return {prompt:`Write <b class="mono">${fmt(n)}</b> as an 8-bit two's complement number.`,check:chkBits(tc(n,8),8),work:flipWork(n,8)}}
+],"Your answer");
+
+const FPV=[8,4,2,1,.5,.25,.125,.0625],FLAB=["8","4","2","1","½","¼","⅛","1⁄16"],fx=b=>b.slice(0,4)+"."+b.slice(4);
+typedQ($("#p-fx"),[
+  ()=>{const n=rnd(1,15)*16+pick([8,4,12]),s=bin(n,8);return {prompt:`What is the denary value of the fixed point number <b class="mono">${fx(s)}</b>?`,check:chkNum(n/16),work:pvTable(s,FPV,FLAB)+`<p class="mono ans">${fx(s)} = ${n/16}</p>`}},
+  ()=>{const n=rnd(1,15)*16+pick([8,4,12,2,6,10]),s=bin(n,8);return {prompt:`Write <b class="mono">${n/16}</b> as an 8-bit fixed point number (4 bits before the point, 4 after).`,
+    check:v=>{v=v.replace(/\s/g,"");if(!/^[01]*\.?[01]+$/.test(v))return "Use 0s and 1s, with an optional binary point.";
+      if(v.includes(".")){const p=v.split(".");return Math.abs(parseInt(p[0]||"0",2)+parseInt(p[1],2)/2**p[1].length-n/16)<1e-9}
+      return v.length===8?v===s:"Give all 8 bits, or include the binary point."},
+    work:`<p>Whole part ${n>>4} = ${bin(n>>4,4)}. Fraction part ${(n&15)/16} = .${bin(n&15,4)}</p>${pvTable(s,FPV,FLAB)}<p class="mono ans">${n/16} = ${fx(s)}</p>`}}
+],"Your answer");
+
+function floatQ(mv,e){ // mv: 5-bit two's complement integer (−16..15), mantissa = mv/16
+  const mb=tc(mv,5),eb=tc(e,3),m=mv/16,val=m*2**e;
+  return {prompt:`An 8-bit register holds the floating point number <b class="mono">${mb} ${eb}</b> (5-bit mantissa, then 3-bit exponent). What is its denary value?`,
+    check:chkNum(val),
+    work:`<p>Mantissa <span class="mono">${mb[0]}.${mb.slice(1)}</span></p>${pvTable(mb,MPV,MLAB)}<p>Exponent <span class="mono">${eb}</span></p>${pvTable(eb,EPV,ELAB)}
+      <p class="mono ans">${fmt(m)} × 2<sup>${fmt(e)}</sup> = ${fmt(m)} × ${pow(e)} = ${fmt(val)}</p>`};
+}
+typedQ($("#p-float"),[
+  ()=>floatQ(pick([8,10,12,14]),rnd(1,3)),
+  ()=>floatQ(8+rnd(0,7),rnd(0,3)),
+  ()=>floatQ(pick([8,12,10]),pick([-1,-2])),
+  ()=>floatQ(pick([-16,-12,-10,-14]),rnd(1,3)),
+  ()=>floatQ(pick([8,12,-12,-16,10,-10]),pick([-1,2,3,-2]))
+],"Your answer");
+})();
+</script>
+
+</body>
+</html>
