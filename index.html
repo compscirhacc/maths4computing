@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sets, Logic and Number Revision</title>
+<style>
+:root{color-scheme:light}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+/* Layout: one workbook column; sticky outcome tabs; each criterion = recap on top, practice box below. */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --sunk:#e9edf3; --ink:#17202e; --muted:#566275; --line:#cfd6e1;
+  --accent:#2447a8; --on-accent:#ffffff; --shade:#4f7fe0; --good:#17753f; --bad:#b3261e; --good-bg:#e2f4e9; --bad-bg:#fbe6e4;
+  --text:Aptos,Calibri,"Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"Cascadia Mono",Consolas,ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#11151c; --surface:#1a2029; --sunk:#232b37; --ink:#e7ebf1; --muted:#9ba7b9; --line:#364152;
+  --accent:#9db8ff; --on-accent:#0f1830; --shade:#5f8cf0; --good:#63d394; --bad:#ff9087; --good-bg:#173524; --bad-bg:#3d1c1a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#11151c; --surface:#1a2029; --sunk:#232b37; --ink:#e7ebf1; --muted:#9ba7b9; --line:#364152;
+  --accent:#9db8ff; --on-accent:#0f1830; --shade:#5f8cf0; --good:#63d394; --bad:#ff9087; --good-bg:#173524; --bad-bg:#3d1c1a; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--text);font-size:17px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:880px;margin:0 auto;padding-block:20px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:1.7rem;line-height:1.2;margin:0 0 4px;text-wrap:balance}
+h2{font-size:1.3rem;margin:0;text-wrap:balance}
+h3{font-size:1.08rem;margin:0;text-wrap:balance}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch}
+.mono,code{font-family:var(--mono);font-size:.95em}
+code{background:var(--sunk);padding:1px 5px;border-radius:4px}
+
+.progress{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;align-items:center}
+.chip{font-family:var(--mono);font-size:.8rem;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:var(--surface)}
+.chip.done{border-color:var(--good);color:var(--good);background:var(--good-bg)}
+.progress .sum{font-size:.9rem;color:var(--muted);margin-right:6px}
+.link{background:none;border:0;color:var(--accent);font:inherit;font-size:.9rem;text-decoration:underline;cursor:pointer;padding:0}
+
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px;margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+nav button{font:inherit;text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;min-width:0}
+nav button b{display:block;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+nav button span{display:block;font-size:.95rem;line-height:1.25}
+nav button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+nav button[aria-selected="true"] b{color:var(--on-accent);opacity:.85}
+@media (max-width:620px){nav{grid-template-columns:repeat(2,1fr)}}
+
+section.lo{display:flex;flex-direction:column;gap:22px;margin-top:8px}
+.ac{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.ac-head{display:flex;gap:10px;align-items:baseline}
+.ac-num{font-family:var(--mono);font-weight:700;color:var(--accent);flex:none}
+.recap ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;max-width:70ch}
+.label{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+.practice{background:var(--sunk);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.q{display:flex;flex-direction:column;gap:10px;min-width:0}
+.prompt{max-width:68ch}
+.given{font-family:var(--mono);font-size:.95rem;display:flex;flex-direction:column;gap:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=text],select{font:inherit;font-family:var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-width:0}
+input[type=text]{flex:1 1 220px;max-width:340px}
+.btn{font:inherit;font-size:.95rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 14px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fb{min-height:1.5em;font-weight:600}
+.fb.ok{color:var(--good)} .fb.no{color:var(--bad)} .fb.info{color:var(--muted);font-weight:400}
+.work{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:6px;overflow-x:auto}
+.work .ans{font-weight:700}
+
+.scroll{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:.95rem}
+th,td{border:1px solid var(--line);padding:4px 10px;text-align:center;background:var(--surface)}
+th{background:var(--ink);color:var(--bg);font-weight:600;white-space:nowrap}
+td.out{padding:2px}
+.cell{font:inherit;width:44px;height:32px;border:1px dashed var(--muted);border-radius:4px;background:var(--surface);color:var(--ink);cursor:pointer}
+.cell.set{border-style:solid;font-weight:700}
+.cell.right{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.cell.wrong{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+
+.venn{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.venn canvas{width:320px;max-width:100%;height:auto;aspect-ratio:320/270;background:var(--surface);border-radius:6px;cursor:pointer;touch-action:manipulation}
+.regions{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 200px;min-width:0}
+.regions button{font:inherit;font-family:var(--mono);font-size:.82rem;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.regions button[aria-pressed="true"]{background:var(--shade);border-color:var(--shade);color:#fff}
+
+svg.circuit{width:100%;max-width:460px;height:auto;display:block}
+svg.circuit .w{stroke:var(--ink);stroke-width:2;fill:none}
+svg.circuit .g{stroke:var(--ink);stroke-width:2;fill:var(--surface)}
+svg.circuit .slot{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4;fill:var(--surface)}
+svg.circuit .dot{fill:var(--ink)}
+svg.circuit text{fill:var(--ink);font-family:var(--mono);font-size:13px}
+svg.circuit text.sm{fill:var(--muted);font-size:10px}
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.gates figure{margin:0;display:flex;flex-direction:column;gap:6px;align-items:flex-start;min-width:0}
+.gates figcaption{font-weight:700}
+.gates svg{max-width:90px}
+.picks{display:flex;flex-wrap:wrap;gap:10px}
+.picks label{display:flex;flex-direction:column;gap:3px;font-size:.85rem;color:var(--muted)}
+.note{font-size:.92rem;color:var(--muted);border-left:3px solid var(--line);padding-left:10px;max-width:70ch}
+@media (prefers-reduced-motion:no-preference){.btn,.cell,nav button{transition:background-color .12s,border-color .12s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Sets, Logic and Number Revision</h1>
+    <p class="lede">Twelve assessment criteria, each with a short recap and practice that marks itself. Press New question as often as you like; the numbers change every time.</p>
+    <div class="progress" id="progress"></div>
+  </header>
+
+  <nav role="tablist" aria-label="Learning outcomes">
+    <button role="tab" id="tab-lo1" data-lo="lo1"><b>Outcome 1</b><span>Sets</span></button>
+    <button role="tab" id="tab-lo2" data-lo="lo2"><b>Outcome 2</b><span>Logical operators</span></button>
+    <button role="tab" id="tab-lo3" data-lo="lo3"><b>Outcome 3</b><span>Logic gates</span></button>
+    <button role="tab" id="tab-lo4" data-lo="lo4"><b>Outcome 4</b><span>Number formats</span></button>
+  </nav>
+
+  <!-- ===================== LO1 ===================== -->
+  <section class="lo" id="lo1" role="tabpanel" aria-labelledby="tab-lo1">
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">1.1</span><h3>Carry out set operations on three sets, including complements, unions and intersections, the universal set and the empty set</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li><b>U</b> is the universal set: everything we are considering. <b>∅</b> is the empty set: no elements at all.</li>
+        <li><b>A ∪ B</b> (union): in A or B or both. <b>A ∩ B</b> (intersection): in both A and B.</li>
+        <li><b>A′</b> (complement): in U but not in A. You may also see this written Aᶜ or Ā.</li>
+        <li>Work out brackets first, the same as in arithmetic.</li>
+        <li>Useful facts: A ∩ ∅ = ∅, A ∪ ∅ = A, A ∪ U = U, A ∩ U = A, U′ = ∅, ∅′ = U.</li>
+        <li>Example with U = {1, …, 8}, A = {1, 2, 3, 4}, B = {3, 4, 5}: A ∪ B = {1, 2, 3, 4, 5}, A ∩ B = {3, 4}, (A ∪ B)′ = {6, 7, 8}.</li>
+      </ul></div>
+      <div class="practice"><p class="label">Practice</p><div id="w11"></div></div>
+    </article>
+
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">1.2</span><h3>Draw Venn diagrams for at most three sets and the universal set</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li>Draw a rectangle for U, then three overlapping circles. That gives 8 regions, counting the area outside all the circles.</li>
+        <li>Union: shade everything inside either set. Intersection: shade only the overlap. Complement: shade everything outside the set.</li>
+        <li>If you are unsure, test the regions one at a time: does a point in this region satisfy the expression?</li>
+      </ul></div>
+      <div class="practice"><p class="label">Practice</p><div id="w12"></div></div>
+    </article>
+
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">1.3</span><h3>Solve problems using at most three sets</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li>Sketch the Venn diagram and fill it in from the middle outwards.</li>
+        <li>Start with the number in all three. Each "both" figure includes those people, so subtract the middle to get the "these two only" regions.</li>
+        <li>For each "only" region, subtract the three regions already filled in that circle from the circle's total.</li>
+        <li>None = total surveyed minus everything inside the circles.</li>
+      </ul></div>
+      <div class="practice"><p class="label">Practice</p><div id="w13"></div></div>
+    </article>
+  </section>
+
+  <!-- ===================== LO2 ===================== -->
+  <section class="lo" id="lo2" role="tabpanel" aria-labelledby="tab-lo2" hidden>
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">2.2</span><h3>Construct truth tables for NOT, AND and OR</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li><b>NOT</b> flips the input: 0 becomes 1, 1 becomes 0.</li>
+        <li><b>AND</b> gives 1 only when both inputs are 1.</li>
+        <li><b>OR</b> gives 1 when at least one input is 1.</li>
+        <li>A table with n inputs needs 2ⁿ rows. List the rows in binary counting order (00, 01, 10, 11) so none are missed.</li>
+      </ul></div>
+      <div class="practice"><p class="label">Practice: tap each ? to set 0 or 1</p><div id="w22"></div></div>
+    </article>
+
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">2.1</span><h3>Construct truth tables using up to three operators</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li>Three inputs means 8 rows, 000 to 111.</li>
+        <li>Add a working column for each bracket or NOT, then combine those columns for the final output.</li>
+        <li>Example: for (A AND B) OR C, work out the A AND B column first, then OR it with C.</li>
+      </ul></div>
+      <div class="practice"><p class="label">Practice: tap each ? to set 0 or 1</p><div id="w21"></div></div>
+    </article>
+  </section>
+
+  <!-- ===================== LO3 ===================== -->
+  <section class="lo" id="lo3" role="tabpanel" aria-labelledby="tab-lo3" hidden>
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">3.1<br>3.2</span><h3>Construct logic circuits for at most three inputs, including NOT, AND, NAND and OR</h3></div>
+      <div class="recap"><p class="label">Recap: the four gate symbols</p>
+        <div class="gates" id="gateref"></div>
+        <ul style="margin-top:12px">
+          <li>The small circle on a symbol means "invert". NAND is AND followed by NOT, so its output is 0 only when both inputs are 1.</li>
+          <li>To build a circuit from an expression, start with the brackets: those gates sit nearest the inputs. The operator joining the brackets is the last gate, which produces the output Q.</li>
+        </ul></div>
+      <div class="practice"><p class="label">Practice: choose the gate for each position</p><div id="w31"></div></div>
+    </article>
+
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">3.3</span><h3>Construct a simple binary adder circuit</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li>A <b>half adder</b> adds two bits, A and B. It has two outputs: Sum and Carry.</li>
+        <li>Carry = A AND B. Sum is 1 when exactly one input is 1.</li>
+        <li>Using only the gates in this unit: Sum = (A OR B) AND (A NAND B). The circuit is drawn below.</li>
+        <li>A <b>full adder</b> adds three bits: A, B and a carry in. It is built from two half adders and an OR gate. Sum is 1 when an odd number of inputs are 1; carry out is 1 when two or more inputs are 1.</li>
+      </ul>
+      <div id="halfadder" style="margin-top:10px"></div></div>
+      <div class="practice"><p class="label">Practice: complete the adder truth tables</p><div id="w33"></div></div>
+    </article>
+  </section>
+
+  <!-- ===================== LO4 ===================== -->
+  <section class="lo" id="lo4" role="tabpanel" aria-labelledby="tab-lo4" hidden>
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">4.1</span><h3>Express numbers in binary and hexadecimal</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li>Binary place values for 8 bits: <span class="mono">128 64 32 16 8 4 2 1</span>. Work left to right: if the place value fits, write 1 and subtract it; if not, write 0.</li>
+        <li>Hexadecimal is base 16. Digits: 0–9 then <span class="mono">A=10 B=11 C=12 D=13 E=14 F=15</span>.</li>
+        <li>Denary to hex: divide by 16. The whole-number result is the first digit and the remainder is the second. Example: 174 ÷ 16 = 10 remainder 14, so 174 = AE.</li>
+      </ul></div>
+      <div class="practice"><p class="label">Practice</p><div id="w41"></div></div>
+    </article>
+
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">4.2</span><h3>Convert numbers between binary and hexadecimal formats</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li>One hex digit is exactly four bits (a nibble).</li>
+        <li>Binary to hex: split into groups of four from the right and convert each group. <span class="mono">1011 0110</span> is 11 and 6, so B6.</li>
+        <li>Hex to binary: write each digit as four bits. 3C is <span class="mono">0011 1100</span>.</li>
+      </ul></div>
+      <div class="practice"><p class="label">Practice</p><div id="w42"></div></div>
+    </article>
+
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">4.3</span><h3>Express numbers and letters in ASCII and Unicode formats</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li>ASCII gives each character a 7-bit code (128 characters), normally stored in an 8-bit byte.</li>
+        <li>Codes to remember: space = 32, <span class="mono">'0'</span> = 48, <span class="mono">'A'</span> = 65, <span class="mono">'a'</span> = 97. Digits and letters run in order, so <span class="mono">'C'</span> = 67 and <span class="mono">'5'</span> = 53.</li>
+        <li>The character <span class="mono">'5'</span> (code 53) is not the same as the number 5.</li>
+        <li>Unicode covers far more characters. Each has a code point written U+ followed by hex, for example € is U+20AC. The first 128 code points match ASCII, so <span class="mono">'A'</span> is U+0041.</li>
+      </ul></div>
+      <div class="practice"><p class="label">Practice</p><div id="w43"></div></div>
+    </article>
+
+    <article class="ac">
+      <div class="ac-head"><span class="ac-num">4.4</span><h3>Express register contents as binary, hexadecimal, fixed point or floating point numbers</h3></div>
+      <div class="recap"><p class="label">Recap</p><ul>
+        <li>A register holds a fixed number of bits. The same bits can mean different things depending on how they are read.</li>
+        <li><b>Fixed point</b> (here: 4 bits before the point, 4 after). Place values: <span class="mono">8 4 2 1 . ½ ¼ ⅛ 1⁄16</span>. So <span class="mono">0101.1100</span> = 4 + 1 + ½ + ¼ = 5.75.</li>
+        <li><b>Floating point</b>: value = mantissa × 2<sup>exponent</sup>. Read the exponent, then move the binary point that many places (right if positive, left if negative).</li>
+        <li>3-bit two's complement exponents: <span class="mono">000=0 001=1 010=2 011=3 100=−4 101=−3 110=−2 111=−1</span>.</li>
+      </ul>
+      <p class="note" style="margin-top:10px">Floating point questions here use an 8-bit register: a 5-bit mantissa with the binary point after the first bit, then a 3-bit exponent, both in two's complement. Check this matches the layout used in your class notes.</p></div>
+      <div class="practice"><p class="label">Practice</p><div id="w44"></div></div>
+    </article>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r)=>(r||document).querySelector(s);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[rnd(0,a.length-1)];
+let uid=0;
+
+/* ---------- progress ---------- */
+const ACS=["1.1","1.2","1.3","2.1","2.2","3.1","3.2","3.3","4.1","4.2","4.3","4.4"];
+let score={};
+try{score=JSON.parse(localStorage.getItem("slnr-score")||"{}")||{}}catch(e){score={}}
+function save(){try{localStorage.setItem("slnr-score",JSON.stringify(score))}catch(e){}}
+function drawProgress(){
+  const done=ACS.filter(a=>score[a]>0).length;
+  $("#progress").innerHTML=`<span class="sum">${done} of 12 criteria answered correctly</span>`+
+    ACS.map(a=>`<span class="chip${score[a]>0?" done":""}">${a}${score[a]>0?" ✓ "+score[a]:""}</span>`).join("")+
+    (done?` <button class="link" id="reset" type="button">Reset</button>`:"");
+  const r=$("#reset"); if(r) r.onclick=()=>{score={};save();drawProgress()};
+}
+function credit(acs){[].concat(acs).forEach(a=>{score[a]=(score[a]||0)+1});save();drawProgress()}
+
+/* ---------- tabs ---------- */
+const LOS=["lo1","lo2","lo3","lo4"];
+function show(lo){
+  if(!LOS.includes(lo)) lo="lo1";
+  LOS.forEach(id=>{document.getElementById(id).hidden=id!==lo;document.getElementById("tab-"+id).setAttribute("aria-selected",id===lo)});
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{show(b.dataset.lo);try{location.hash=b.dataset.lo}catch(e){}window.scrollTo(0,0)});
+window.addEventListener("hashchange",()=>show(location.hash.slice(1)));
+show(location.hash.slice(1));
+
+/* ---------- generic typed-answer widget ---------- */
+function typedQ(host,ac,gens,placeholder){
+  const id="in"+(++uid); let q,done,i=rnd(0,gens.length-1);
+  host.innerHTML=`<div class="q"><div class="prompt"></div>
+    <div class="row"><input type="text" id="${id}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" placeholder="${placeholder||"Your answer"}">
+    <button class="btn primary" type="button" data-a="check">Check</button></div>
+    <p class="fb" role="status"></p>
+    <div class="row"><button class="btn" type="button" data-a="show">Show working</button><button class="btn" type="button" data-a="new">New question</button></div>
+    <div class="work" hidden></div></div>`;
+  const inp=$("input",host),fb=$(".fb",host),work=$(".work",host);
+  function load(){q=gens[i++%gens.length]();done=false;$(".prompt",host).innerHTML=q.prompt;inp.value="";fb.textContent="";fb.className="fb";work.hidden=true;work.innerHTML=q.work}
+  function check(){
+    const v=inp.value.trim();
+    if(!v){fb.className="fb info";fb.textContent="Type an answer first.";return}
+    const r=q.check(v);
+    if(r===true){fb.className="fb ok";fb.textContent="Correct.";if(!done){done=true;credit(ac)}}
+    else if(typeof r==="string"){fb.className="fb info";fb.textContent=r}
+    else{fb.className="fb no";fb.textContent="Not quite. Try again, or show the working."}
+  }
+  host.addEventListener("click",e=>{const a=e.target.dataset&&e.target.dataset.a;if(a==="check")check();if(a==="show"){work.hidden=!work.hidden;done=true}if(a==="new")load()});
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")check()});
+  load();
+}
+
+/* ---------- LO1: sets ---------- */
+const SX=[
+ {t:"A ∪ B",f:(a,b,c)=>a||b,how:"Everything that is in A or in B (or both)."},
+ {t:"A ∩ B",f:(a,b,c)=>a&&b,how:"Only what is in both A and B."},
+ {t:"A ∩ B ∩ C",f:(a,b,c)=>a&&b&&c,how:"Only what is in all three sets."},
+ {t:"A ∪ B ∪ C",f:(a,b,c)=>a||b||c,how:"Everything that is in at least one of the three sets."},
+ {t:"A′",f:(a,b,c)=>!a,how:"Everything in U that is not in A."},
+ {t:"(A ∪ B)′",f:(a,b,c)=>!(a||b),st:[["A ∪ B",(a,b,c)=>a||b]],how:"Find A ∪ B first, then take everything in U outside it."},
+ {t:"(A ∪ B) ∩ C",f:(a,b,c)=>(a||b)&&c,st:[["A ∪ B",(a,b,c)=>a||b]],how:"Find A ∪ B, then keep only what is also in C."},
+ {t:"(A ∩ B) ∪ C",f:(a,b,c)=>(a&&b)||c,st:[["A ∩ B",(a,b,c)=>a&&b]],how:"Find A ∩ B, then add everything in C."},
+ {t:"A ∩ B′",f:(a,b,c)=>a&&!b,st:[["B′",(a,b,c)=>!b]],how:"The part of A that is not in B."},
+ {t:"A′ ∩ C",f:(a,b,c)=>!a&&c,st:[["A′",(a,b,c)=>!a]],how:"The part of C that is not in A."},
+ {t:"(A ∪ B ∪ C)′",f:(a,b,c)=>!(a||b||c),st:[["A ∪ B ∪ C",(a,b,c)=>a||b||c]],how:"Everything in U that is outside all three sets."},
+ {t:"B ∩ A′ ∩ C′",f:(a,b,c)=>b&&!a&&!c,how:"In B, but not in A and not in C. This is the 'B only' region."}
+];
+const SX2=[
+ {t:"A ∩ ∅",f:()=>false,how:"Nothing is in the empty set, so nothing can be in both. The answer is ∅."},
+ {t:"B ∪ U",f:()=>true,how:"U already contains everything, so the union is U itself."},
+ {t:"U′",f:()=>false,how:"Nothing in U is outside U, so U′ = ∅."},
+ {t:"∅′",f:()=>true,how:"Everything in U is outside the empty set, so ∅′ = U."},
+ {t:"C ∪ ∅",f:(a,b,c)=>c,how:"Adding nothing changes nothing: C ∪ ∅ = C."}
+];
+const fmtSet=a=>a.length?"{"+a.join(", ")+"}":"∅";
+function parseSet(s){
+  s=s.trim().replace(/[{}]/g,"").trim();
+  if(/^(∅|empty|empty set|none|nothing|)$/i.test(s)) return [];
+  const parts=s.split(/[\s,;]+/).filter(Boolean);
+  if(parts.some(p=>!/^\d+$/.test(p))) return null;
+  return [...new Set(parts.map(Number))].sort((x,y)=>x-y);
+}
+function genSets(){
+  const U=[1,2,3,4,5,6,7,8,9,10]; let A,B,C;
+  const mk=()=>U.filter(()=>Math.random()<.45);
+  do{A=mk();B=mk();C=mk()}while([A,B,C].some(s=>s.length<3||s.length>6));
+  return {U,A,B,C};
+}
+function gen11(){
+  const S=genSets(), x=Math.random()<.3?pick(SX2):pick(SX);
+  const ev=f=>S.U.filter(n=>f(S.A.includes(n),S.B.includes(n),S.C.includes(n)));
+  const ans=ev(x.f);
+  return {
+    prompt:`<div class="given"><span>U = ${fmtSet(S.U)}</span><span>A = ${fmtSet(S.A)}</span><span>B = ${fmtSet(S.B)}</span><span>C = ${fmtSet(S.C)}</span></div>
+      <p style="margin-top:8px">List the elements of <b class="mono">${x.t}</b>. Separate them with commas. For the empty set, type <code>empty</code>.</p>`,
+    check:v=>{const p=parseSet(v);if(p===null)return "Use numbers separated by commas, or type empty.";return p.join()===ans.join()},
+    work:`<p>${x.how}</p>`+(x.st||[]).map(s=>`<p class="mono">${s[0]} = ${fmtSet(ev(s[1]))}</p>`).join("")+`<p class="mono ans">${x.t} = ${fmtSet(ans)}</p>`
+  };
+}
+typedQ($("#w11"),"1.1",[gen11],"e.g. 2, 5, 7");
+
+/* Venn shading */
+(function(){
+  const host=$("#w12"), W=320,H=270,S=2, R=70, cs=[[125,110],[195,110],[160,170]];
+  const names=["Outside all three","C only","B only","B ∩ C only","A only","A ∩ C only","A ∩ B only","A ∩ B ∩ C"];
+  host.innerHTML=`<div class="q"><p class="prompt"></p>
+    <div class="venn"><canvas width="${W*S}" height="${H*S}" role="img" aria-label="Venn diagram of sets A, B and C inside U. Use the region buttons to shade."></canvas>
+    <div class="regions">${names.map((n,i)=>`<button type="button" data-r="${i}" aria-pressed="false">${n}</button>`).join("")}</div></div>
+    <div class="row"><button class="btn primary" type="button" data-a="check">Check</button><button class="btn" type="button" data-a="show">Show answer</button><button class="btn" type="button" data-a="new">New question</button></div>
+    <p class="fb" role="status"></p></div>`;
+  const cv=$("canvas",host),ctx=cv.getContext("2d"),fb=$(".fb",host); let sel=new Set(),q,done;
+  const region=(x,y)=>cs.reduce((acc,c)=>acc*2+((x-c[0])**2+(y-c[1])**2<=R*R?1:0),0);
+  function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||"#888888"}
+  function hex(h){h=h.replace("#","");return [0,2,4].map(i=>parseInt(h.substr(i,2),16))}
+  function draw(){
+    const img=ctx.createImageData(W*S,H*S), d=img.data, c=hex(tok("--shade"));
+    for(let py=0;py<H*S;py++)for(let px=0;px<W*S;px++){
+      const x=px/S,y=py/S; if(x<6||x>W-6||y<6||y>H-6)continue;
+      if(sel.has(region(x,y))){const k=(py*W*S+px)*4;d[k]=c[0];d[k+1]=c[1];d[k+2]=c[2];d[k+3]=150}
+    }
+    ctx.putImageData(img,0,0);
+    ctx.save();ctx.scale(S,S);ctx.strokeStyle=tok("--ink");ctx.fillStyle=tok("--ink");ctx.lineWidth=1.6;
+    ctx.strokeRect(6,6,W-12,H-12);
+    cs.forEach(c=>{ctx.beginPath();ctx.arc(c[0],c[1],R,0,7);ctx.stroke()});
+    ctx.font="bold 16px Consolas, monospace";ctx.textAlign="center";
+    ctx.fillText("A",68,52);ctx.fillText("B",252,52);ctx.fillText("C",160,258);ctx.fillText("U",22,28);
+    ctx.restore();
+    host.querySelectorAll(".regions button").forEach(b=>b.setAttribute("aria-pressed",sel.has(+b.dataset.r)));
+  }
+  function toggle(r){sel.has(r)?sel.delete(r):sel.add(r);fb.textContent="";fb.className="fb";draw()}
+  const target=()=>{const t=new Set();for(let r=0;r<8;r++)if(q.f(!!(r&4),!!(r&2),!!(r&1)))t.add(r);return t};
+  function load(){q=pick(SX);sel=new Set();done=false;fb.textContent="";fb.className="fb";
+    $(".prompt",host).innerHTML=`Shade the region for <b class="mono">${q.t}</b>. Tap the diagram or use the region buttons.`;draw()}
+  cv.addEventListener("click",e=>{const b=cv.getBoundingClientRect(),x=(e.clientX-b.left)*W/b.width,y=(e.clientY-b.top)*H/b.height;
+    if(x<6||x>W-6||y<6||y>H-6)return;toggle(region(x,y))});
+  host.addEventListener("click",e=>{
+    const t=e.target; if(t.dataset.r!==undefined){toggle(+t.dataset.r);return}
+    const a=t.dataset.a;
+    if(a==="new")load();
+    if(a==="show"){sel=target();done=true;draw();fb.className="fb info";fb.textContent="Answer shown. "+q.how}
+    if(a==="check"){const T=target(),ok=T.size===sel.size&&[...T].every(r=>sel.has(r));
+      if(ok){fb.className="fb ok";fb.textContent="Correct.";if(!done){done=true;credit("1.2")}}
+      else{fb.className="fb no";fb.textContent="Not quite. Check each of the 8 regions in turn, including the area outside the circles."}}
+  });
+  try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",draw)}catch(e){}
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+  load();
+})();
+
+/* Three-set survey problems */
+function gen13(){
+  const sc=pick([
+    {who:"learners",v:"have used",n:["Python","Java","C#"]},
+    {who:"staff",v:"use",n:["a laptop","a tablet","a phone"]},
+    {who:"gamers",v:"play on",n:["PC","console","mobile"]},
+    {who:"students",v:"study",n:["Maths","Computing","Physics"]}]);
+  const abc=rnd(1,5),ab=rnd(1,6),ac=rnd(1,6),bc=rnd(1,6),a=rnd(2,10),b=rnd(2,10),c=rnd(2,10),none=rnd(1,8);
+  const A=a+ab+ac+abc,B=b+ab+bc+abc,C=c+ac+bc+abc,inside=a+b+c+ab+ac+bc+abc,N=inside+none;
+  const [x,y,z]=sc.n;
+  const qs=[
+    [`How many ${sc.who} ${sc.v} none of the three?`,none,`None = ${N} − ${inside} = ${none}`],
+    [`How many ${sc.who} ${sc.v} ${x} only?`,a,`${x} only = ${a}`],
+    [`How many ${sc.who} ${sc.v} exactly two of the three?`,ab+ac+bc,`Exactly two = ${ab} + ${ac} + ${bc} = ${ab+ac+bc}`],
+    [`How many ${sc.who} ${sc.v} at least one of the three?`,inside,`At least one = everything inside the circles = ${inside}`],
+    [`How many ${sc.who} ${sc.v} ${z} only?`,c,`${z} only = ${c}`]];
+  const Q=pick(qs);
+  return {
+    prompt:`<p>A survey of <b>${N}</b> ${sc.who} found:</p>
+      <ul style="margin:6px 0;padding-left:20px"><li>${A} ${sc.v} ${x}, ${B} ${sc.v} ${y}, ${C} ${sc.v} ${z}</li>
+      <li>${ab+abc} ${sc.v} both ${x} and ${y}</li><li>${ac+abc} ${sc.v} both ${x} and ${z}</li><li>${bc+abc} ${sc.v} both ${y} and ${z}</li>
+      <li>${abc} ${sc.v} all three</li></ul><p><b>${Q[0]}</b></p>`,
+    check:v=>/^\d+$/.test(v)?Number(v)===Q[1]:"Type a whole number.",
+    work:`<p>Fill the Venn diagram from the middle outwards.</p>
+      <p class="mono">All three = ${abc}</p>
+      <p class="mono">${x} and ${y} only = ${ab+abc} − ${abc} = ${ab}</p>
+      <p class="mono">${x} and ${z} only = ${ac+abc} − ${abc} = ${ac}</p>
+      <p class="mono">${y} and ${z} only = ${bc+abc} − ${abc} = ${bc}</p>
+      <p class="mono">${x} only = ${A} − (${ab} + ${ac} + ${abc}) = ${a}</p>
+      <p class="mono">${y} only = ${B} − (${ab} + ${bc} + ${abc}) = ${b}</p>
+      <p class="mono">${z} only = ${C} − (${ac} + ${bc} + ${abc}) = ${c}</p>
+      <p class="mono">Inside the circles = ${inside}, so none = ${N} − ${inside} = ${none}</p>
+      <p class="mono ans">${Q[2]}</p>`
+  };
+}
+typedQ($("#w13"),"1.3",[gen13],"A whole number");
+
+/* ---------- truth table widget ---------- */
+function ttWidget(host,ac,list){
+  let i=0,q,vals,done,n,rows;
+  const bits=r=>q.vars.map((_,j)=>(r>>(n-1-j))&1);
+  function tableHTML(answer){
+    const steps=answer?(q.steps||[]):[];
+    let h=`<div class="scroll"><table><tr>${q.vars.map(v=>`<th>${v}</th>`).join("")}${steps.map(s=>`<th>${s[0]}</th>`).join("")}${q.outs.map(o=>`<th>${o[0]}</th>`).join("")}</tr>`;
+    for(let r=0;r<rows;r++){const b=bits(r);
+      h+=`<tr>${b.map(x=>`<td>${x}</td>`).join("")}${steps.map(s=>`<td>${s[1](...b)}</td>`).join("")}`+
+        q.outs.map((o,k)=>answer?`<td><b>${o[1](...b)}</b></td>`:`<td class="out"><button type="button" class="cell" data-c="${r*q.outs.length+k}" aria-label="${o[0]} for inputs ${b.join(" ")}">?</button></td>`).join("")+`</tr>`}
+    return h+"</table></div>";
+  }
+  function load(){q=list[i++%list.length];n=q.vars.length;rows=1<<n;vals=Array(rows*q.outs.length).fill(null);done=false;
+    host.innerHTML=`<div class="q"><p class="prompt">${q.prompt}</p>${tableHTML(false)}
+      <p class="fb" role="status"></p>
+      <div class="row"><button class="btn primary" type="button" data-a="check">Check</button><button class="btn" type="button" data-a="show">Show working</button><button class="btn" type="button" data-a="new">Next table</button></div>
+      <div class="work" hidden>${q.note?`<p>${q.note}</p>`:""}${tableHTML(true)}</div></div>`}
+  host.addEventListener("click",e=>{
+    const t=e.target,fb=$(".fb",host);
+    if(t.dataset.c!==undefined){const c=+t.dataset.c;vals[c]=vals[c]===0?1:0;t.textContent=vals[c];t.className="cell set";fb.textContent="";return}
+    const a=t.dataset.a;
+    if(a==="new")load();
+    if(a==="show"){const w=$(".work",host);w.hidden=!w.hidden;done=true}
+    if(a==="check"){
+      if(vals.includes(null)){fb.className="fb info";fb.textContent="Fill in every ? first.";return}
+      let ok=true;
+      host.querySelectorAll(".cell").forEach(b=>{const c=+b.dataset.c,r=Math.floor(c/q.outs.length),k=c%q.outs.length,good=q.outs[k][1](...bits(r))===vals[c];
+        b.className="cell set "+(good?"right":"wrong");if(!good)ok=false});
+      if(ok){fb.className="fb ok";fb.textContent="Correct.";if(!done){done=true;credit(ac)}}
+      else{fb.className="fb no";fb.textContent="Some rows are wrong (shown in red). Tap to change them and check again."}
+    }
+  });
+  load();
+}
+const N=x=>1-x;
+ttWidget($("#w22"),"2.2",[
+  {prompt:"Complete the truth table for <b class='mono'>A AND B</b>.",vars:["A","B"],outs:[["A AND B",(a,b)=>a&b]],note:"AND is 1 only when both inputs are 1."},
+  {prompt:"Complete the truth table for <b class='mono'>A OR B</b>.",vars:["A","B"],outs:[["A OR B",(a,b)=>a|b]],note:"OR is 1 when at least one input is 1."},
+  {prompt:"Complete the truth table for <b class='mono'>NOT A</b>.",vars:["A"],outs:[["NOT A",a=>N(a)]],note:"NOT flips the input."}
+]);
+const T3=(expr,steps,f)=>({prompt:`Complete the truth table for <b class='mono'>Q = ${expr}</b>.`,vars:["A","B","C"],steps,outs:[["Q",f]],note:"Work out the extra columns first, then combine them."});
+ttWidget($("#w21"),"2.1",[
+  T3("(A AND B) OR C",[["A AND B",(a,b,c)=>a&b]],(a,b,c)=>(a&b)|c),
+  T3("(A OR B) AND (NOT C)",[["A OR B",(a,b,c)=>a|b],["NOT C",(a,b,c)=>N(c)]],(a,b,c)=>(a|b)&N(c)),
+  T3("(NOT A) AND (B OR C)",[["NOT A",(a,b,c)=>N(a)],["B OR C",(a,b,c)=>b|c]],(a,b,c)=>N(a)&(b|c)),
+  T3("NOT (A AND B) OR C",[["A AND B",(a,b,c)=>a&b],["NOT (A AND B)",(a,b,c)=>N(a&b)]],(a,b,c)=>N(a&b)|c),
+  T3("(A AND (NOT B)) OR C",[["NOT B",(a,b,c)=>N(b)],["A AND (NOT B)",(a,b,c)=>a&N(b)]],(a,b,c)=>(a&N(b))|c),
+  T3("NOT ((A OR B) AND C)",[["A OR B",(a,b,c)=>a|b],["(A OR B) AND C",(a,b,c)=>(a|b)&c]],(a,b,c)=>N((a|b)&c))
+]);
+
+/* ---------- LO3: gates ---------- */
+function gate(t,x,y){ // 50 wide, 40 tall; inputs on left, output at (x+50, y+20)
+  const out=`<line class="w" x1="${x+38}" y1="${y+20}" x2="${x+50}" y2="${y+20}"/>`;
+  if(t==="AND") return out+`<path class="g" d="M${x},${y} h20 a20,20 0 0 1 0,40 h-20 z"/>`;
+  if(t==="NAND")return out+`<path class="g" d="M${x},${y} h20 a20,20 0 0 1 0,40 h-20 z"/><circle class="g" cx="${x+44}" cy="${y+20}" r="4"/>`;
+  if(t==="OR")  return out+`<path class="g" d="M${x},${y} q10,20 0,40 q28,0 40,-20 q-12,-20 -40,-20 z"/>`;
+  if(t==="NOT") return out+`<path class="g" d="M${x},${y+5} l30,15 l-30,15 z"/><circle class="g" cx="${x+34}" cy="${y+20}" r="4"/>`;
+  if(t==="WIRE")return `<line class="w" x1="${x}" y1="${y+20}" x2="${x+50}" y2="${y+20}"/>`;
+  return `<rect class="slot" x="${x}" y="${y}" width="44" height="40" rx="4"/><text x="${x+22}" y="${y+25}" text-anchor="middle">?</text>`;
+}
+const GT={AND:"0 0 0 1",OR:"0 1 1 1",NAND:"1 1 1 0"};
+$("#gateref").innerHTML=["NOT","AND","OR","NAND"].map(t=>{
+  const two=t!=="NOT";
+  const ins=two?`<line class="w" x1="2" y1="15" x2="26" y2="15"/><line class="w" x1="2" y1="35" x2="26" y2="35"/>`:`<line class="w" x1="2" y1="25" x2="22" y2="25"/>`;
+  const tbl=two?`<table><tr><th>A</th><th>B</th><th>Q</th></tr>${[0,1,2,3].map(r=>`<tr><td>${r>>1}</td><td>${r&1}</td><td>${GT[t].split(" ")[r]}</td></tr>`).join("")}</table>`
+               :`<table><tr><th>A</th><th>Q</th></tr><tr><td>0</td><td>1</td></tr><tr><td>1</td><td>0</td></tr></table>`;
+  return `<figure><figcaption>${t}</figcaption><svg class="circuit" viewBox="0 0 80 50" role="img" aria-label="${t} gate symbol">${ins}${gate(t,20,5)}</svg>${tbl}</figure>`;
+}).join("");
+
+(function(){
+  const host=$("#w31"), F={AND:(x,y)=>x&y,OR:(x,y)=>x|y,NAND:(x,y)=>1-(x&y)};
+  let q,sel,done;
+  const ev=(s,a,b,c)=>F[s.g3](F[s.g1](a,b),s.g2==="NOT"?1-c:c);
+  const svg=s=>`<svg class="circuit" viewBox="0 0 420 200" role="img" aria-label="Circuit with inputs A, B and C, three gate positions and output Q">
+    <text x="10" y="55">A</text><text x="10" y="75">B</text><text x="10" y="155">C</text>
+    <line class="w" x1="26" y1="50" x2="136" y2="50"/><line class="w" x1="26" y1="70" x2="136" y2="70"/><line class="w" x1="26" y1="150" x2="${s.g2?130:136}" y2="150"/>
+    <polyline class="w" points="180,60 250,60 250,95 296,95"/><polyline class="w" points="180,150 250,150 250,115 296,115"/>
+    <line class="w" x1="340" y1="105" x2="385" y2="105"/><text x="392" y="110">Q</text>
+    ${gate(s.g1,130,40)}${gate(s.g2,130,130)}${gate(s.g3,290,85)}
+    <text class="sm" x="152" y="32" text-anchor="middle">GATE 1</text><text class="sm" x="152" y="186" text-anchor="middle">GATE 2</text><text class="sm" x="312" y="77" text-anchor="middle">GATE 3</text></svg>`;
+  const opts=(two,id,lab)=>`<label for="${id}">${lab}<select id="${id}"><option value="">Choose…</option>${(two?["AND","OR","NAND"]:["NOT","WIRE"]).map(o=>`<option value="${o}">${o==="WIRE"?"No gate (plain wire)":o}</option>`).join("")}</select></label>`;
+  function ttable(s){let h=`<div class="scroll"><table><tr><th>A</th><th>B</th><th>C</th><th>Q</th></tr>`;
+    for(let r=0;r<8;r++){const a=r>>2&1,b=r>>1&1,c=r&1;h+=`<tr><td>${a}</td><td>${b}</td><td>${c}</td><td><b>${ev(s,a,b,c)}</b></td></tr>`}return h+"</table></div>"}
+  function load(){
+    q={g1:pick(["AND","OR","NAND"]),g2:pick(["NOT","NOT","WIRE"]),g3:pick(["AND","OR","NAND"])};sel={g1:"",g2:"",g3:""};done=false;
+    const expr=`(A ${q.g1} B) ${q.g3} ${q.g2==="NOT"?"(NOT C)":"C"}`;
+    host.innerHTML=`<div class="q"><p class="prompt">Build the circuit for <b class="mono">Q = ${expr}</b>.</p>
+      <div class="scroll" id="cdraw">${svg(sel)}</div>
+      <div class="picks">${opts(true,"g1","Gate 1 (A, B)")}${opts(false,"g2","Gate 2 (C)")}${opts(true,"g3","Gate 3 (output)")}</div>
+      <p class="fb" role="status"></p>
+      <div class="row"><button class="btn primary" type="button" data-a="check">Check</button><button class="btn" type="button" data-a="show">Show answer</button><button class="btn" type="button" data-a="new">New circuit</button></div>
+      <div class="work" hidden></div></div>`;
+  }
+  host.addEventListener("change",e=>{if(e.target.tagName==="SELECT"){sel[e.target.id]=e.target.value;$("#cdraw",host).innerHTML=svg(sel);$(".fb",host).textContent=""}});
+  host.addEventListener("click",e=>{
+    const a=e.target.dataset.a,fb=$(".fb",host),w=$(".work",host);
+    if(a==="new")load();
+    if(a==="show"){done=true;w.hidden=false;w.innerHTML=`<p>Gate 1 is ${q.g1}, gate 2 is ${q.g2==="NOT"?"NOT":"a plain wire (C goes straight in)"}, gate 3 is ${q.g3}.</p>${svg(q)}${ttable(q)}`}
+    if(a==="check"){
+      if(!sel.g1||!sel.g2||!sel.g3){fb.className="fb info";fb.textContent="Choose something for all three positions first.";return}
+      let ok=true;for(let r=0;r<8;r++)if(ev(sel,r>>2&1,r>>1&1,r&1)!==ev(q,r>>2&1,r>>1&1,r&1))ok=false;
+      if(ok){fb.className="fb ok";fb.textContent="Correct. The truth table for your circuit is below.";w.hidden=false;w.innerHTML=ttable(sel);if(!done){done=true;credit(["3.1","3.2"])}}
+      else{fb.className="fb no";fb.textContent="Not quite. Match each bracket in the expression to the gate nearest those inputs.";}
+    }
+  });
+  load();
+})();
+
+$("#halfadder").innerHTML=`<div class="scroll"><svg class="circuit" viewBox="0 0 420 220" role="img" aria-label="Half adder: A and B feed an OR gate and a NAND gate, whose outputs feed an AND gate to give Sum. A and B also feed a second AND gate to give Carry.">
+  <text x="10" y="40">A</text><text x="10" y="60">B</text>
+  <line class="w" x1="26" y1="35" x2="136" y2="35"/><line class="w" x1="26" y1="55" x2="136" y2="55"/>
+  <polyline class="w" points="60,35 60,175 136,175"/><line class="w" x1="60" y1="100" x2="136" y2="100"/>
+  <polyline class="w" points="85,55 85,195 136,195"/><line class="w" x1="85" y1="120" x2="136" y2="120"/>
+  <circle class="dot" cx="60" cy="35" r="3.5"/><circle class="dot" cx="60" cy="100" r="3.5"/><circle class="dot" cx="85" cy="55" r="3.5"/><circle class="dot" cx="85" cy="120" r="3.5"/>
+  <polyline class="w" points="180,45 250,45 250,70 296,70"/><polyline class="w" points="180,110 250,110 250,90 296,90"/>
+  <line class="w" x1="340" y1="80" x2="362" y2="80"/><text x="368" y="85">Sum</text>
+  <line class="w" x1="180" y1="185" x2="362" y2="185"/><text x="368" y="190">Carry</text>
+  ${gate("OR",130,25)}${gate("NAND",130,90)}${gate("AND",130,165)}${gate("AND",290,60)}
+  <text class="sm" x="150" y="20" text-anchor="middle">OR</text><text class="sm" x="150" y="86" text-anchor="middle">NAND</text><text class="sm" x="150" y="161" text-anchor="middle">AND</text><text class="sm" x="310" y="55" text-anchor="middle">AND</text></svg></div>`;
+
+ttWidget($("#w33"),"3.3",[
+  {prompt:"<b>Half adder.</b> Complete the Sum and Carry columns for adding A and B.",vars:["A","B"],outs:[["Sum",(a,b)=>a^b],["Carry",(a,b)=>a&b]],
+   note:"Add the bits in each row. 1 + 1 = 10 in binary: Sum 0, Carry 1."},
+  {prompt:"<b>Full adder.</b> Complete the Sum and Carry out columns for adding A, B and the carry in.",vars:["A","B","Cin"],outs:[["Sum",(a,b,c)=>a^b^c],["Cout",(a,b,c)=>(a+b+c)>>1]],
+   note:"Count the 1s in each row. One 1: Sum 1. Two 1s: Sum 0, Carry 1. Three 1s: Sum 1, Carry 1."}
+]);
+
+/* ---------- LO4: number formats ---------- */
+const bin=(n,w)=>n.toString(2).padStart(w||8,"0");
+const nib=s=>s.replace(/(.{4})(?=.)/g,"$1 ");
+const hx=(n,w)=>n.toString(16).toUpperCase().padStart(w||2,"0");
+function asBin(v){v=v.replace(/[\s_]/g,"");return /^[01]+$/.test(v)?parseInt(v,2):null}
+function asHex(v){v=v.replace(/\s/g,"").replace(/^(0x|#|u\+)/i,"");return /^[0-9a-f]+$/i.test(v)?parseInt(v,16):null}
+const chkBin=n=>v=>{const x=asBin(v);return x===null?"Use only 0s and 1s.":x===n};
+const chkHex=n=>v=>{const x=asHex(v);return x===null?"Use hex digits only: 0–9 and A–F.":x===n};
+function pvTable(n){const pv=[128,64,32,16,8,4,2,1],b=bin(n);
+  return `<div class="scroll"><table><tr>${pv.map(p=>`<th>${p}</th>`).join("")}</tr><tr>${[...b].map(x=>`<td>${x}</td>`).join("")}</tr></table></div>
+  <p class="mono">${pv.filter((p,i)=>b[i]==="1").join(" + ")||0} = ${n}</p>`}
+const nibWork=n=>`<p class="mono">${bin(n>>4,4)} = ${n>>4}${(n>>4)>9?" = "+hx(n>>4,1):""} &nbsp; ${bin(n&15,4)} = ${n&15}${(n&15)>9?" = "+hx(n&15,1):""}</p>`;
+
+typedQ($("#w41"),"4.1",[
+  ()=>{const n=rnd(17,255);return {prompt:`Write the denary number <b class="mono">${n}</b> as an 8-bit binary number.`,check:chkBin(n),work:pvTable(n)+`<p class="mono ans">${n} = ${nib(bin(n))}</p>`}},
+  ()=>{const n=rnd(26,255);return {prompt:`Write the denary number <b class="mono">${n}</b> in hexadecimal.`,check:chkHex(n),
+    work:`<p class="mono">${n} ÷ 16 = ${n>>4} remainder ${n&15}</p><p class="mono">${n>>4} → ${hx(n>>4,1)} &nbsp; ${n&15} → ${hx(n&15,1)}</p><p class="mono ans">${n} = ${hx(n)}</p>`}}
+]);
+typedQ($("#w42"),"4.2",[
+  ()=>{const n=rnd(16,255);return {prompt:`Convert the binary number <b class="mono">${nib(bin(n))}</b> to hexadecimal.`,check:chkHex(n),work:`<p>Split into two groups of four bits.</p>${nibWork(n)}<p class="mono ans">${nib(bin(n))} = ${hx(n)}</p>`}},
+  ()=>{const n=rnd(16,255);return {prompt:`Convert the hexadecimal number <b class="mono">${hx(n)}</b> to 8-bit binary.`,check:chkBin(n),work:`<p>Write each hex digit as four bits.</p>${nibWork(n)}<p class="mono ans">${hx(n)} = ${nib(bin(n))}</p>`}}
+]);
+
+const rchar=()=>{const k=rnd(0,2);return k===0?String.fromCharCode(rnd(66,90)):k===1?String.fromCharCode(rnd(98,122)):String.fromCharCode(rnd(49,57))};
+const anchor=ch=>{const c=ch.charCodeAt(0),base=c>=97?97:c>=65?65:48,b=String.fromCharCode(base);return `<p class="mono">'${b}' = ${base}, and '${ch}' is ${c-base} place${c-base===1?"":"s"} after '${b}', so '${ch}' = ${base} + ${c-base} = ${c}</p>`};
+typedQ($("#w43"),"4.3",[
+  ()=>{const ch=rchar(),c=ch.charCodeAt(0);return {prompt:`What is the ASCII code for the character <b class="mono">'${ch}'</b>, in denary?`,check:v=>/^\d+$/.test(v)?Number(v)===c:"Type a whole number.",work:anchor(ch)+`<p class="mono ans">'${ch}' = ${c}</p>`}},
+  ()=>{const ch=rchar(),c=ch.charCodeAt(0);return {prompt:`Write the ASCII code for <b class="mono">'${ch}'</b> as an 8-bit binary number.`,check:chkBin(c),work:anchor(ch)+pvTable(c)+`<p class="mono ans">'${ch}' = ${nib(bin(c))}</p>`}},
+  ()=>{const ch=rchar(),c=ch.charCodeAt(0);return {prompt:`A byte holds the ASCII code <b class="mono">${hx(c)}</b> in hexadecimal. Which character is it?`,check:v=>v===ch,
+    work:`<p class="mono">${hx(c)} = ${c>>4} × 16 + ${c&15} = ${c}</p>${anchor(ch)}<p class="mono ans">${hx(c)} is '${ch}' (upper and lower case have different codes)</p>`}},
+  ()=>{const ch=rchar(),c=ch.charCodeAt(0);return {prompt:`Write the Unicode code point for <b class="mono">'${ch}'</b> in the form U+ followed by four hex digits.`,check:chkHex(c),
+    work:anchor(ch)+`<p class="mono">${c} ÷ 16 = ${c>>4} remainder ${c&15}, so ${c} = ${hx(c)} in hex</p><p class="mono ans">'${ch}' = U+${hx(c,4)}</p>`}},
+  ()=>{const u=pick([["€",0x20AC],["£",0x00A3],["é",0x00E9],["₹",0x20B9],["Ω",0x03A9]]);return {prompt:`The Unicode code point for <b class="mono">${u[0]}</b> is <b class="mono">U+${hx(u[1],4)}</b>. Write it as a 16-bit binary number.`,check:chkBin(u[1]),
+    work:`<p>Write each hex digit as four bits.</p><p class="mono">${[...hx(u[1],4)].map(d=>d+" = "+bin(parseInt(d,16),4)).join(" &nbsp; ")}</p><p class="mono ans">U+${hx(u[1],4)} = ${nib(bin(u[1],16))}</p>`}}
+]);
+
+const fx=b=>b.slice(0,4)+"."+b.slice(4);
+function fxWork(n){const b=bin(n),lab=["8","4","2","1","½","¼","⅛","1⁄16"],val=[8,4,2,1,.5,.25,.125,.0625];
+  return `<div class="scroll"><table><tr>${lab.map(p=>`<th>${p}</th>`).join("")}</tr><tr>${[...b].map(x=>`<td>${x}</td>`).join("")}</tr></table></div>
+  <p class="mono">${val.filter((p,i)=>b[i]==="1").join(" + ")||0} = ${n/16}</p>`}
+const chkNum=x=>v=>{v=v.replace(/\s/g,"");return /^-?\d*\.?\d+$/.test(v)?Math.abs(parseFloat(v)-x)<1e-9:"Type a number, using a decimal point if needed."};
+typedQ($("#w44"),"4.4",[
+  ()=>{const n=rnd(1,15)*16+pick([4,8,12,2,6,10,14]);return {prompt:`An 8-bit register holds <b class="mono">${nib(bin(n))}</b>. Read as a fixed point number with 4 bits before the binary point and 4 after, what is its denary value?`,
+    check:chkNum(n/16),work:`<p class="mono">${fx(bin(n))}</p>${fxWork(n)}<p class="mono ans">${fx(bin(n))} = ${n/16}</p>`}},
+  ()=>{const n=rnd(1,15)*16+pick([4,8,12,2,6,10]);return {prompt:`Write the denary number <b class="mono">${n/16}</b> as an 8-bit fixed point number (4 bits before the binary point, 4 after).`,
+    check:v=>{v=v.replace(/\s/g,"");if(!/^[01]*\.?[01]+$/.test(v))return "Use 0s and 1s, with an optional binary point.";
+      if(v.includes(".")){const p=v.split(".");return Math.abs(parseInt(p[0]||"0",2)+parseInt(p[1],2)/2**p[1].length-n/16)<1e-9}
+      return v.length===8?parseInt(v,2)===n:"Give all 8 bits, or include the binary point."},
+    work:`<p>Whole part ${n>>4} = ${bin(n>>4,4)}. Fraction part ${(n&15)/16} = .${bin(n&15,4)}</p>${fxWork(n)}<p class="mono ans">${n/16} = ${fx(bin(n))}</p>`}},
+  ()=>{const n=rnd(1,15)*16+pick([4,8,12]);return {prompt:`A register holds <b class="mono">${hx(n)}</b> in hexadecimal. Read as a fixed point number (4 bits before the point, 4 after), what is its denary value?`,
+    check:chkNum(n/16),work:`<p>Convert to binary first, then place the point.</p>${nibWork(n)}${fxWork(n)}<p class="mono ans">${hx(n)} = ${fx(bin(n))} = ${n/16}</p>`}},
+  ()=>{const m=8+rnd(0,7),e=rnd(-2,3),mb=bin(m,5),eb=bin((e+8)%8,3),val=m/16*2**e;
+    const shifted=e>=0?(mb.slice(0,1+e)+"."+mb.slice(1+e)):("0."+"0".repeat(-e)+mb.slice(1));
+    return {prompt:`An 8-bit register holds the floating point number <b class="mono">${mb} ${eb}</b> (5-bit mantissa, then 3-bit exponent). What is its denary value?`,
+      check:chkNum(val),
+      work:`<p class="mono">Mantissa ${mb[0]}.${mb.slice(1)} = ${m/16}</p><p class="mono">Exponent ${eb} = ${e}</p>
+        <p>${e===0?"The exponent is 0, so the point stays where it is.":`Move the binary point ${Math.abs(e)} place${Math.abs(e)===1?"":"s"} to the ${e>0?"right":"left"}.`}</p>
+        <p class="mono">${shifted} = ${val}</p><p class="mono ans">${m/16} × 2<sup>${e}</sup> = ${val}</p>`}}
+]);
+
+drawProgress();
+})();
+</script>
+
+</body>
+</html>
